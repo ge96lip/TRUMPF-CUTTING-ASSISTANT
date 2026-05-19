@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TRUMPF Cutting Assistant</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -52,17 +53,24 @@ label{display:block;font-size:.875rem;margin-bottom:6px;font-weight:500}
 .brand-logo-word{font-weight:700;font-size:1rem;letter-spacing:0;color:#000}
 .brand-logo-mark{width:56px;height:41px;background:#1238C4;display:block}
 .nav-links{display:flex;gap:32px;flex:1;justify-content:center}
-.nav-links a{color:var(--color-text);font-weight:500;padding:8px 0;border-bottom:2px solid transparent;cursor:pointer}
-.nav-links a.active{border-bottom-color:var(--color-accent)}
+.nav-links a,.nav-links label{color:var(--color-text);font-weight:500;padding:8px 0;border-bottom:2px solid transparent;cursor:pointer}
+.nav-links a.active,.nav-links label.active{border-bottom-color:var(--color-accent)}
 .nav-right{display:flex;align-items:center;gap:16px}
 .lang-switch{display:flex;gap:8px;font-size:.875rem}
 .lang-switch button{padding:4px 6px;color:var(--color-text);font-weight:500;border-bottom:2px solid transparent}
 .lang-switch button.active{border-bottom-color:var(--color-accent);color:var(--color-text)}
-.hamburger{display:none;width:40px;height:40px;flex-direction:column;justify-content:center;align-items:center;gap:5px}
+.nav-toggle{position:absolute;opacity:0;pointer-events:none}
+.hamburger{display:none;width:56px;height:56px;flex-direction:column;justify-content:center;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .hamburger span{width:24px;height:2px;background:var(--color-text)}
 .mobile-menu{display:none;position:fixed;inset:72px 0 0;background:#fff;z-index:40;padding:32px 24px;flex-direction:column;gap:24px}
 .mobile-menu.open{display:flex}
-.mobile-menu a{font-size:1.25rem;color:var(--color-text);font-weight:500}
+.nav-toggle:checked ~ .mobile-menu{display:flex}
+.mobile-menu a,.mobile-menu label{font-size:1.25rem;color:var(--color-text);font-weight:500;cursor:pointer}
+.mobile-lang{border-top:var(--border);padding-top:20px;margin-top:4px}
+.mobile-lang-label{display:block;font-size:.875rem;font-weight:500;color:#555;margin-bottom:12px}
+.mobile-lang .lang-switch{display:flex;gap:8px;flex-wrap:wrap}
+.mobile-lang .lang-switch button{min-width:44px;min-height:44px;border:var(--border);border-radius:4px;padding:8px 10px;background:#fff}
+.mobile-lang .lang-switch button.active{background:var(--color-accent);border-color:var(--color-accent);color:#fff}
 
 /* Sections */
 section{padding:64px 0}
@@ -81,6 +89,7 @@ section[id]{scroll-margin-top:88px}
 .bg-blue .hero-grid p.sub{color:rgba(255,255,255,.9)}
 .hero-ctas{display:flex;gap:16px;flex-wrap:wrap}
 .img-ph{background:#3a3a3a;color:#bbb;border-radius:8px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font-size:.875rem}
+.hero-photo{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;box-shadow:var(--shadow)}
 
 .trust-bar{margin-top:32px;display:flex;gap:24px;flex-wrap:wrap;font-size:.875rem;color:#555}
 .bg-blue .trust-bar{color:rgba(255,255,255,.85)}
@@ -178,6 +187,7 @@ section[id]{scroll-margin-top:88px}
 .bg-green label{color:#fff}
 .privacy{font-size:.75rem;color:#666;margin-top:8px}
 .bg-green .privacy{color:rgba(255,255,255,.85)}
+.bg-blue .privacy{color:rgba(255,255,255,.9)}
 .char-count{font-size:.75rem;color:#666;text-align:right;margin-top:4px}
 .checkbox-group,.radio-group{display:flex;flex-wrap:wrap;gap:12px}
 .checkbox-group label,.radio-group label{display:flex;align-items:center;gap:6px;font-weight:400;margin:0}
@@ -207,13 +217,18 @@ section[id]{scroll-margin-top:88px}
 @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-6px);opacity:1}}
 
 /* Page switching */
+.page-toggle{position:absolute;opacity:0;pointer-events:none}
 .page{display:none}
 .page.active{display:block}
+#pageExistingToggle:checked ~ #page-existing,
+#pageNewToggle:checked ~ #page-new,
+#pageResearchToggle:checked ~ #page-research{display:block}
 
 /* Responsive */
 @media (max-width:900px){
   .nav-links{display:none}
   .lang-switch{display:none}
+  .mobile-lang .lang-switch{display:flex}
   .hamburger{display:flex}
   .nav .btn{display:none}
   .nav-inner{min-height:72px}
@@ -240,34 +255,42 @@ section[id]{scroll-margin-top:88px}
 </head>
 <body>
 
+<input class="page-toggle" type="radio" name="pageToggle" id="pageExistingToggle" checked>
+<input class="page-toggle" type="radio" name="pageToggle" id="pageNewToggle">
+<input class="page-toggle" type="radio" name="pageToggle" id="pageResearchToggle">
+
 <!-- NAV -->
 <nav class="nav">
+  <input class="nav-toggle" type="checkbox" id="navToggle" aria-hidden="true">
   <div class="container nav-inner">
-    <a class="brand-logo" data-page="existing" aria-label="TRUMPF Startseite">
+    <a class="brand-logo" href="#existing" data-page="existing" aria-label="TRUMPF Startseite">
       <span class="brand-logo-word">TRUMPF</span>
       <span class="brand-logo-mark" aria-hidden="true"></span>
     </a>
     <div class="nav-links">
-      <a data-page="existing" class="active" data-i18n="nav.existing">Bestandskunden</a>
-      <a data-page="new" data-i18n="nav.new">Neukunden</a>
-      <a data-page="research" data-i18n="nav.research">Forschung</a>
+      <label for="pageExistingToggle" data-page="existing" class="active" data-i18n="nav.existing">Bestandskunden</label>
+      <label for="pageNewToggle" data-page="new" data-i18n="nav.new">Neukunden</label>
+      <label for="pageResearchToggle" data-page="research" data-i18n="nav.research">Forschung</label>
     </div>
     <div class="nav-right">
       <div class="lang-switch" id="langSwitch"></div>
       <button class="btn btn-primary" id="openChat" data-i18n="nav.openChat">Chatbot öffnen</button>
-      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      <label class="hamburger" id="hamburger" for="navToggle" role="button" aria-label="Menu" tabindex="0"><span></span><span></span><span></span></label>
     </div>
   </div>
   <div class="mobile-menu" id="mobileMenu">
-    <a data-page="existing" data-i18n="nav.existing">Bestandskunden</a>
-    <a data-page="new" data-i18n="nav.new">Neukunden</a>
-    <a data-page="research" data-i18n="nav.research">Forschung</a>
-    <div class="lang-switch" id="langSwitchMobile" style="display:flex"></div>
+    <label for="pageExistingToggle" data-page="existing" data-i18n="nav.existing">Bestandskunden</label>
+    <label for="pageNewToggle" data-page="new" data-i18n="nav.new">Neukunden</label>
+    <label for="pageResearchToggle" data-page="research" data-i18n="nav.research">Forschung</label>
+    <div class="mobile-lang">
+      <span class="mobile-lang-label">Language / Sprache</span>
+      <div class="lang-switch" id="langSwitchMobile"></div>
+    </div>
   </div>
 </nav>
 
 <!-- PAGE: EXISTING -->
-<main id="page-existing" class="page active">
+<main id="page-existing" class="page">
   <section class="bg-off">
     <div class="container hero-grid">
       <div>
@@ -278,7 +301,7 @@ section[id]{scroll-margin-top:88px}
           <a class="btn btn-outline" href="https://www.youtube.com/watch?v=o1MlP6caIrk" data-i18n="ex.cta2">Demo anschauen</a>
         </div>
       </div>
-      <div class="img-ph" data-i18n="ex.heroImg">Hero image: Scanner in Aktion</div>
+      <img class="hero-photo" src="Cutting_Assistant_1.jpg" alt="Cutting Assistant scanner in action">
     </div>
   </section>
 
@@ -396,12 +419,12 @@ section[id]{scroll-margin-top:88px}
         <h1 data-i18n="nw.h1">Perfekte Schnittkanten. Vom ersten Tag an. Ohne Experten.</h1>
         <p class="sub" data-i18n="nw.sub">Der TRUMPF Cutting Assistant nutzt Künstliche Intelligenz, um Ihre Laserschneidparameter automatisch zu optimieren — egal welches Material, egal wie erfahren Ihr Team ist.</p>
         <div class="hero-ctas">
-          <a class="btn btn-primary" data-i18n="nw.cta1">Jetzt Beratung anfragen</a>
-          <a class="btn btn-outline" data-i18n="nw.cta2">Wie es funktioniert</a>
+          <a class="btn btn-primary" href="#new-cta" data-i18n="nw.cta1">Jetzt Beratung anfragen</a>
+          <a class="btn btn-outline" href="https://www.trumpf.com/de_INT/newsroom/pressemitteilungen-lokal/pressemitteilung-detailseite-lokal/release/intech-trumpf-verbessert-mit-ki-die-kanten-beim-laserschneiden-9213/" data-i18n="nw.cta2">Wie es funktioniert</a>
         </div>
         <div class="trust-bar"><span data-i18n="nw.t1">Über 100 Jahre Fertigungserfahrung</span><span data-i18n="nw.t2">Weltmarktführer Lasertechnologie</span><span data-i18n="nw.t3">KI-Innovation seit 2025</span></div>
       </div>
-      <div class="img-ph" data-i18n="nw.heroImg">Hero image: TruLaser Maschine</div>
+      <img class="hero-photo" src="Cutting_Assistant_1.jpg" alt="Cutting Assistant scanner in action">
     </div>
   </section>
 
@@ -475,7 +498,7 @@ section[id]{scroll-margin-top:88px}
     </div>
   </section>
 
-  <section class="bg-white">
+  <section class="bg-green" id="new-cta">
     <div class="container">
       <h2 data-i18n="nw.frmH">Bereit für Ihre erste Anfrage?</h2>
       <p style="margin-bottom:24px" data-i18n="nw.frmSub">Erzählen Sie uns von Ihrer Fertigung. Wir melden uns mit einer individuellen Einschätzung.</p>
@@ -491,7 +514,7 @@ section[id]{scroll-margin-top:88px}
         <div><label data-i18n="nw.matsQ">Welche Materialien schneiden Sie hauptsächlich?</label><input></div>
         <div><label data-i18n="form.employees">Mitarbeiterzahl</label><select><option>1–10</option><option>11–50</option><option>51–250</option><option>250+</option></select></div>
         <div><label data-i18n="form.message">Nachricht</label><textarea rows="4"></textarea></div>
-        <button class="btn btn-primary" type="submit" style="justify-self:start" data-i18n="nw.frmCta">Beratungsgespräch anfragen</button>
+        <button class="btn btn-white" type="submit" style="justify-self:start" data-i18n="nw.frmCta">Beratungsgespräch anfragen</button>
         <p class="privacy" data-i18n="form.privacy">Datenschutzerklärung</p>
       </form>
     </div>
@@ -506,12 +529,12 @@ section[id]{scroll-margin-top:88px}
         <h1 data-i18n="rs.h1">Industrielle KI trifft auf Grundlagenforschung. Was könnte entstehen?</h1>
         <p class="sub" data-i18n="rs.sub">TRUMPF öffnet das Ökosystem des Cutting Assistants für Forschungspartner — von Datenzugang bis zu gemeinsamer Modellentwicklung.</p>
         <div class="hero-ctas">
-          <a class="btn btn-white" data-i18n="rs.cta1">Kooperationsgespräch anfragen</a>
-          <a class="btn btn-white-outline" data-i18n="rs.cta2">Technisches Whitepaper herunterladen</a>
+          <a class="btn btn-white" href="#research-cta" data-i18n="rs.cta1">Kooperationsgespräch anfragen</a>
+          <a class="btn btn-white-outline" href="https://www.trumpf.com/filestorage/TRUMPF_Master/Products/Machines_and_Systems/02_Brochures/TRUMPF-Cutting-Assistant-flyer-EN.pdf" data-i18n="rs.cta2">Technisches Whitepaper herunterladen</a>
         </div>
         <div class="trust-bar"><span data-i18n="rs.t1">518,5 Mio. EUR F+E-Budget</span><span data-i18n="rs.t2">3.006 Mitarbeiter in der Produktentwicklung</span><span data-i18n="rs.t3">Globale Forschungspartnerschaften</span></div>
       </div>
-      <div class="img-ph" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" data-i18n="rs.heroImg">Heatmap-Overlay Schnittkante</div>
+      <img class="hero-photo" src="Cutting_Assistant_2.jpg" alt="Heatmap overlay cut edge">
     </div>
   </section>
 
@@ -595,7 +618,7 @@ section[id]{scroll-margin-top:88px}
     </div>
   </section>
 
-  <section class="bg-off">
+  <section class="bg-blue" id="research-cta">
     <div class="container">
       <h2 data-i18n="rs.frmH">Lassen Sie uns sprechen.</h2>
       <form class="form" onsubmit="return submitForm(event)">
@@ -623,7 +646,7 @@ section[id]{scroll-margin-top:88px}
             <label><input type="radio" name="funded"> <span data-i18n="rs.r3">In Planung</span></label>
           </div>
         </div>
-        <button class="btn btn-blue" type="submit" style="justify-self:start" data-i18n="rs.frmCta">Kooperationsanfrage senden</button>
+        <button class="btn btn-white" type="submit" style="justify-self:start" data-i18n="rs.frmCta">Kooperationsanfrage senden</button>
         <p class="privacy" data-i18n="rs.frmNote">Ihre Anfrage wird innerhalb von fünf Werktagen geprüft. Alle Informationen werden vertraulich behandelt.</p>
       </form>
     </div>
@@ -709,7 +732,13 @@ const T = {
 };
 
 // ===== STATE =====
-let lang = 'de';
+function readStoredLang(){
+  try{return localStorage.getItem('trumpf-lang')}catch(e){return null}
+}
+function storeLang(value){
+  try{localStorage.setItem('trumpf-lang',value)}catch(e){}
+}
+let lang = readStoredLang() || 'de';
 let currentPage = 'existing';
 const LANGS = ['DE','EN','ES','NL','IT','SV','FR'];
 
@@ -740,23 +769,50 @@ function renderLangSwitch(){
     const el = document.getElementById(id);
     if(!el) return;
     el.innerHTML = LANGS.map(L=>`<button data-lang="${L.toLowerCase()}" class="${L.toLowerCase()===lang?'active':''}">${L}</button>`).join('');
-    el.querySelectorAll('button').forEach(b=>b.onclick=()=>{lang=b.dataset.lang;applyI18n();});
+    el.querySelectorAll('button').forEach(b=>b.onclick=e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      lang=b.dataset.lang;
+      storeLang(lang);
+      applyI18n();
+    });
   });
 }
 
 // ===== NAV =====
+const PAGES = ['existing','new','research'];
+function pageFromHash(){
+  const p = window.location.hash.replace('#','');
+  return PAGES.includes(p) ? p : 'existing';
+}
 function showPage(p){
+  if(!PAGES.includes(p)) p = 'existing';
   currentPage = p;
+  const pageToggle = document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1)+'Toggle');
+  if(pageToggle) pageToggle.checked = true;
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  document.querySelectorAll('.nav-links a, .mobile-menu a').forEach(a=>{
+  document.querySelectorAll('.nav-links a, .nav-links label, .mobile-menu a, .mobile-menu label').forEach(a=>{
     a.classList.toggle('active', a.dataset.page===p);
   });
   document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('navToggle').checked = false;
   window.scrollTo(0,0);
 }
-document.querySelectorAll('[data-page]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();showPage(a.dataset.page)}));
-document.getElementById('hamburger').onclick=()=>document.getElementById('mobileMenu').classList.toggle('open');
+document.addEventListener('click', e=>{
+  const link = e.target.closest('[data-page]');
+  if(!link) return;
+  e.preventDefault();
+  showPage(link.dataset.page);
+  try{history.replaceState(null,'','#'+link.dataset.page)}catch(err){}
+});
+window.addEventListener('hashchange', ()=>showPage(pageFromHash()));
+if(window.location.hash) showPage(pageFromHash());
+document.getElementById('hamburger').addEventListener('keydown', e=>{
+  if(e.key!=='Enter' && e.key!==' ') return;
+  e.preventDefault();
+  document.getElementById('navToggle').checked = !document.getElementById('navToggle').checked;
+});
 
 // ===== FAQ =====
 document.querySelectorAll('.faq-q').forEach(q=>q.addEventListener('click',()=>q.parentElement.classList.toggle('open')));
