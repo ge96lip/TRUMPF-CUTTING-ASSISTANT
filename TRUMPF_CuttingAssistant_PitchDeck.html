@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRUMPF Cutting Assistant — C-Level Pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g:#7DB500;
+  --b:#1E5799;
+  --k:#1A1A1A;
+  --bg:#F2F2F2;
+  --w:#FFFFFF;
+  --dim:rgba(26,26,26,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',sans-serif;background:#111;color:var(--k)}
+
+/* DECK SHELL */
+.deck{width:100%;height:100%;position:relative}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;opacity:0;transition:opacity .35s ease}
+.slide.active{display:flex;opacity:1}
+
+/* PROGRESS BAR */
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--g);transition:width .35s ease;z-index:100}
+
+/* SLIDE NUMBER */
+.slide-num{position:fixed;bottom:20px;right:28px;font-size:.75rem;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.35);z-index:100;letter-spacing:.08em}
+
+/* NAV DOTS */
+.nav-dots{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:100}
+.nav-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:background .2s}
+.nav-dots span.active{background:var(--g)}
+
+/* ARROW HINTS */
+.arrow-hint{position:fixed;bottom:12px;font-size:.65rem;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.2);letter-spacing:.06em;z-index:100}
+.arrow-hint.left{left:20px}
+.arrow-hint.right{right:20px}
+
+/* ===== SLIDE LAYOUTS ===== */
+
+/* 1. TITLE SLIDE */
+.s-title{background:var(--k)}
+.s-title .inner{flex:1;display:flex;flex-direction:column;justify-content:center;padding:80px 100px;max-width:1100px}
+.s-title .tag{font-size:.75rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;color:var(--g);text-transform:uppercase;margin-bottom:32px}
+.s-title h1{font-size:clamp(2.5rem,5vw,4.5rem);font-weight:700;color:#fff;line-height:1.05;margin-bottom:24px}
+.s-title h1 em{color:var(--g);font-style:normal}
+.s-title .sub{font-size:1.2rem;font-weight:300;color:rgba(255,255,255,.6);max-width:620px;line-height:1.6}
+.s-title .meta{margin-top:48px;display:flex;gap:40px;font-size:.8rem;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.3);letter-spacing:.05em}
+.s-title .bar{position:absolute;right:0;top:0;bottom:0;width:6px;background:var(--g)}
+
+/* 2. CONTEXT — DARK SPLIT */
+.s-split{background:var(--k);display:flex}
+.s-split .left{flex:1;padding:80px 72px;display:flex;flex-direction:column;justify-content:center;border-right:1px solid rgba(255,255,255,.08)}
+.s-split .right{flex:1;padding:80px 72px;display:flex;flex-direction:column;justify-content:center}
+.s-split .section-tag{font-size:.7rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--g);margin-bottom:20px}
+.s-split h2{font-size:clamp(1.8rem,3vw,2.8rem);font-weight:500;color:#fff;line-height:1.15;margin-bottom:24px}
+.s-split p{font-size:1.05rem;font-weight:300;color:rgba(255,255,255,.65);line-height:1.65;margin-bottom:14px}
+.s-split .stat{margin-top:32px}
+.s-split .stat-num{font-size:3.5rem;font-weight:700;color:var(--g);line-height:1}
+.s-split .stat-label{font-size:.875rem;color:rgba(255,255,255,.45);margin-top:6px;max-width:260px;line-height:1.4}
+
+/* 3. PRODUCT — LIGHT */
+.s-light{background:var(--w);display:flex;flex-direction:column}
+.s-light .top-bar{height:6px;background:var(--g);flex-shrink:0}
+.s-light .inner{flex:1;padding:64px 100px;display:flex;flex-direction:column;justify-content:center}
+.s-light .section-tag{font-size:.7rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--g);margin-bottom:20px}
+.s-light h2{font-size:clamp(1.8rem,3vw,2.8rem);font-weight:500;color:var(--k);margin-bottom:40px}
+.steps-row{display:flex;gap:0}
+.step-item{flex:1;padding:32px 24px;border-left:1px solid var(--dim);position:relative}
+.step-item:first-child{border-left:none;padding-left:0}
+.step-num{font-size:3rem;font-weight:700;color:var(--g);line-height:1;margin-bottom:12px;font-family:'IBM Plex Mono',monospace}
+.step-title{font-weight:500;font-size:1rem;color:var(--k);margin-bottom:8px}
+.step-body{font-size:.9rem;color:#555;line-height:1.55}
+.step-connector{position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:2px;height:32px;background:var(--g)}
+
+/* 4. THREE PAGES OVERVIEW */
+.s-pages{background:var(--bg);display:flex;flex-direction:column}
+.s-pages .top-bar{height:6px;background:var(--b);flex-shrink:0}
+.s-pages .inner{flex:1;padding:56px 80px;display:flex;flex-direction:column;justify-content:center}
+.s-pages .section-tag{font-size:.7rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--b);margin-bottom:20px}
+.s-pages h2{font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:500;color:var(--k);margin-bottom:40px}
+.pages-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.page-card{background:var(--w);border-radius:6px;overflow:hidden;border:1px solid var(--dim)}
+.page-card .card-header{padding:20px 24px;font-weight:500;font-size:.85rem;letter-spacing:.04em}
+.page-card .card-header.green{background:var(--g);color:#fff}
+.page-card .card-header.blue{background:var(--b);color:#fff}
+.page-card .card-header.dark{background:var(--k);color:#fff}
+.page-card .card-body{padding:20px 24px}
+.page-card .card-body p{font-size:.875rem;color:#444;line-height:1.55;margin-bottom:10px}
+.page-card .card-body .target{font-size:.75rem;font-family:'IBM Plex Mono',monospace;color:#888;letter-spacing:.05em;border-top:1px solid var(--dim);padding-top:10px;margin-top:10px}
+.page-card .card-body .cta-goal{font-size:.8rem;font-weight:500;color:var(--g);margin-top:8px}
+
+/* 5. LIVE DEMO SLIDE */
+.s-demo{background:var(--k);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.s-demo .tag{font-size:.75rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;color:var(--g);text-transform:uppercase;margin-bottom:24px}
+.s-demo h2{font-size:clamp(2rem,4vw,3.5rem);font-weight:700;color:#fff;margin-bottom:16px;line-height:1.1}
+.s-demo .sub{font-size:1.1rem;font-weight:300;color:rgba(255,255,255,.55);max-width:560px;line-height:1.6;margin-bottom:40px}
+.demo-checklist{display:flex;flex-direction:column;gap:12px;text-align:left;max-width:520px;width:100%}
+.demo-item{display:flex;align-items:center;gap:16px;padding:14px 20px;background:rgba(255,255,255,.05);border-radius:6px;border:1px solid rgba(255,255,255,.08)}
+.demo-item .check{width:24px;height:24px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;color:#fff;font-weight:700}
+.demo-item p{font-size:.9rem;color:rgba(255,255,255,.8);font-weight:400}
+
+/* 6. TECH + i18n */
+.s-tech{background:var(--w);display:flex;flex-direction:column}
+.s-tech .top-bar{height:6px;background:var(--g);flex-shrink:0}
+.s-tech .inner{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:64px;padding:64px 100px;align-items:center}
+.s-tech .section-tag{font-size:.7rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--g);margin-bottom:20px}
+.s-tech h2{font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:500;color:var(--k);margin-bottom:24px}
+.tech-list{display:grid;gap:12px}
+.tech-row{display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--dim)}
+.tech-dot{width:8px;height:8px;border-radius:50%;background:var(--g);flex-shrink:0}
+.tech-row span{font-size:.9rem;color:#333;line-height:1.4}
+.lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.lang-pill{background:var(--bg);border:1px solid var(--dim);border-radius:4px;padding:10px 12px;text-align:center;font-size:.8rem;font-weight:500;color:var(--k)}
+.lang-pill.featured{background:var(--g);color:#fff;border-color:var(--g)}
+
+/* 7. CHATBOT */
+.s-chat{background:var(--k)}
+.s-chat .inner{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:64px;padding:80px 100px;align-items:center}
+.s-chat .section-tag{font-size:.7rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--g);margin-bottom:20px}
+.s-chat h2{font-size:clamp(1.8rem,3vw,2.6rem);font-weight:500;color:#fff;margin-bottom:20px}
+.s-chat p{font-size:1rem;font-weight:300;color:rgba(255,255,255,.6);line-height:1.65;margin-bottom:14px}
+.chat-mock{background:#1f1f1f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.1)}
+.chat-mock-header{background:#2a2a2a;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+.chat-mock-header .dot-row{display:flex;gap:6px}
+.chat-mock-header .dot-row span{width:10px;height:10px;border-radius:50%}
+.chat-mock-header .dot-row span:nth-child(1){background:#ff5f56}
+.chat-mock-header .dot-row span:nth-child(2){background:#ffbd2e}
+.chat-mock-header .dot-row span:nth-child(3){background:#27c93f}
+.chat-mock-header .title{font-size:.8rem;color:rgba(255,255,255,.5);margin-left:4px;font-family:'IBM Plex Mono',monospace}
+.chat-mock-body{padding:16px;display:flex;flex-direction:column;gap:10px;min-height:200px}
+.cm-bot{background:rgba(255,255,255,.08);border-radius:6px;padding:10px 14px;font-size:.8rem;color:rgba(255,255,255,.75);max-width:85%;line-height:1.5}
+.cm-user{background:var(--g);border-radius:6px;padding:10px 14px;font-size:.8rem;color:#fff;max-width:75%;align-self:flex-end;line-height:1.5}
+.chat-mock-input{background:#2a2a2a;padding:10px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid rgba(255,255,255,.08)}
+.chat-mock-input span{flex:1;font-size:.75rem;color:rgba(255,255,255,.25);font-style:italic;font-family:'IBM Plex Mono',monospace}
+.chat-mock-input .send{width:28px;height:28px;background:var(--g);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#fff}
+
+/* 8. RESEARCH */
+.s-research{background:var(--b);display:flex;flex-direction:column}
+.s-research .inner{flex:1;padding:72px 100px;display:flex;flex-direction:column;justify-content:center}
+.s-research .section-tag{font-size:.7rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:20px}
+.s-research h2{font-size:clamp(1.8rem,3vw,2.6rem);font-weight:500;color:#fff;margin-bottom:36px}
+.tiers-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.tier{background:rgba(255,255,255,.08);border-radius:6px;padding:24px;border:1px solid rgba(255,255,255,.12)}
+.tier-label{font-size:.7rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:12px}
+.tier-title{font-size:1rem;font-weight:500;color:#fff;margin-bottom:10px}
+.tier-body{font-size:.85rem;font-weight:300;color:rgba(255,255,255,.6);line-height:1.55}
+.tier-arrow{font-size:1.5rem;color:rgba(255,255,255,.15);margin:0 4px;align-self:center;display:flex;align-items:center;justify-content:center}
+
+/* 9. ROI */
+.s-roi{background:var(--bg);display:flex;flex-direction:column}
+.s-roi .top-bar{height:6px;background:var(--g);flex-shrink:0}
+.s-roi .inner{flex:1;padding:64px 100px;display:flex;flex-direction:column;justify-content:center}
+.s-roi .section-tag{font-size:.7rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--g);margin-bottom:20px}
+.s-roi h2{font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:500;color:var(--k);margin-bottom:36px}
+.roi-blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.roi-block{background:var(--w);border-radius:6px;padding:28px;border:1px solid var(--dim)}
+.roi-block .num{font-size:2.5rem;font-weight:700;color:var(--g);font-family:'IBM Plex Mono',monospace;line-height:1;margin-bottom:8px}
+.roi-block .label{font-size:.875rem;font-weight:500;color:var(--k);margin-bottom:6px}
+.roi-block .note{font-size:.8rem;color:#777;line-height:1.45}
+.roi-source{font-size:.75rem;font-family:'IBM Plex Mono',monospace;color:#999;margin-top:24px;letter-spacing:.04em}
+
+/* 10. DEPLOYMENT — "TOMORROW" */
+.s-deploy{background:var(--g);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.s-deploy h2{font-size:clamp(2.5rem,5vw,5rem);font-weight:700;color:#fff;line-height:1;margin-bottom:20px}
+.s-deploy .sub{font-size:1.25rem;font-weight:300;color:rgba(255,255,255,.8);max-width:580px;line-height:1.6;margin-bottom:48px}
+.deploy-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:800px;width:100%}
+.deploy-item{background:rgba(255,255,255,.15);border-radius:6px;padding:20px;text-align:center}
+.deploy-item .d-num{font-size:1.8rem;font-weight:700;color:#fff;font-family:'IBM Plex Mono',monospace;line-height:1;margin-bottom:6px}
+.deploy-item .d-label{font-size:.75rem;color:rgba(255,255,255,.75);line-height:1.3;font-weight:400}
+
+/* 11. ASK */
+.s-ask{background:var(--k);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.s-ask .tag{font-size:.75rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;color:var(--g);text-transform:uppercase;margin-bottom:24px}
+.s-ask h2{font-size:clamp(2rem,4vw,3.5rem);font-weight:700;color:#fff;margin-bottom:16px;max-width:700px;line-height:1.1}
+.s-ask .sub{font-size:1.1rem;font-weight:300;color:rgba(255,255,255,.5);max-width:520px;line-height:1.6;margin-bottom:40px}
+.ask-items{display:flex;flex-direction:column;gap:10px;max-width:560px;width:100%;text-align:left}
+.ask-item{display:flex;align-items:flex-start;gap:16px;padding:14px 20px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid rgba(255,255,255,.06)}
+.ask-item .num{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--g);font-weight:500;flex-shrink:0;padding-top:2px}
+.ask-item p{font-size:.9rem;color:rgba(255,255,255,.7);line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="slide-num" id="slideNum">01 / 11</div>
+<div class="nav-dots" id="navDots"></div>
+<div class="arrow-hint left">← PREV</div>
+<div class="arrow-hint right">NEXT →</div>
+
+<div class="deck" id="deck">
+
+<!-- SLIDE 1: TITLE -->
+<div class="slide active s-title">
+  <div class="inner">
+    <div class="tag">C-Level Präsentation · Mai 2025</div>
+    <h1>Der Cutting<br><em>Assistant</em><br>ist fertig.</h1>
+    <p class="sub">Eine vollständige Microsite. Drei Zielgruppen. Sieben Sprachen. Live in 24 Stunden.</p>
+    <div class="meta">
+      <span>TRUMPF INTERN</span>
+      <span>VERTRIEB &amp; DIGITAL</span>
+      <span>DEPLOY-READY</span>
+    </div>
+  </div>
+  <div class="bar"></div>
+</div>
+
+<!-- SLIDE 2: THE PROBLEM -->
+<div class="slide s-split">
+  <div class="left">
+    <div class="section-tag">Ausgangslage</div>
+    <h2>Das Produkt ist exzellent. Die Welt weiß es noch nicht.</h2>
+    <p>Der Cutting Assistant löst ein reales Problem in tausenden Fertigungsbetrieben weltweit. Fachkräftemangel. Sondermaterialien. Verlorenes Parameterwissen.</p>
+    <p>Die Pressemitteilung ist draußen. Das Produktvideo existiert. Aber es gibt keine dedizierte digitale Anlaufstelle — für Bestandskunden, Neukunden oder Forschungspartner.</p>
+  </div>
+  <div class="right">
+    <div class="stat"><div class="stat-num">0</div><div class="stat-label">Dedizierte Landing Pages für den Cutting Assistant zum heutigen Tag</div></div>
+    <div class="stat" style="margin-top:40px"><div class="stat-num">3</div><div class="stat-label">Klar definierte Zielgruppen mit fundamental verschiedenen Kaufmotiven</div></div>
+    <div class="stat" style="margin-top:40px"><div class="stat-num">7</div><div class="stat-label">Sprachmärkte, die heute noch nicht angesprochen werden</div></div>
+  </div>
+</div>
+
+<!-- SLIDE 3: WHAT WE BUILT -->
+<div class="slide s-light">
+  <div class="top-bar"></div>
+  <div class="inner">
+    <div class="section-tag">Was wir gebaut haben</div>
+    <h2>Von der Strategie zur fertigen Website — in einer Iteration.</h2>
+    <div class="steps-row">
+      <div class="step-item">
+        <div class="step-num">01</div>
+        <div class="step-title">Vertriebsstrategie</div>
+        <div class="step-body">Drei Zielgruppen analysiert. Personas definiert. Messaging je Funnel erarbeitet. Alles dokumentiert.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">02</div>
+        <div class="step-title">Vollständige Copy</div>
+        <div class="step-body">Alle Texte für alle drei Seiten. ROI-Rechner. FAQ. Formulare. In produktionsreifem Deutsch.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">03</div>
+        <div class="step-title">Fertige Website</div>
+        <div class="step-body">HTML/CSS/JS. TRUMPF-Farben. Responsive. FAQ-Accordion. ROI-Kalkulator. Kontaktformulare.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">04</div>
+        <div class="step-title">KI-Chatbot</div>
+        <div class="step-body">Spezialisierter Assistent. Beantwortet ausschließlich Fragen zum Cutting Assistant. Sieben Sprachen.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: THREE PAGES -->
+<div class="slide s-pages">
+  <div class="top-bar"></div>
+  <div class="inner">
+    <div class="section-tag">Seitenarchitektur</div>
+    <h2>Eine Microsite. Drei Welten.</h2>
+    <div class="pages-grid">
+      <div class="page-card">
+        <div class="card-header green">Bestandskunden</div>
+        <div class="card-body">
+          <p>Partnerschaftlicher Ton. Identifikation mit dem Problem. ROI-Rechner für konkrete Einsparungen. FAQ zu Retrofit und Datenschutz.</p>
+          <p>Hero: "Ihre Maschine kennt das Material. Jetzt lernt sie, damit umzugehen."</p>
+          <div class="target">Produktionsleiter · Maschinenführer · Lohnfertiger</div>
+          <div class="cta-goal">→ Upgrade-Anfrage via MyTRUMPF</div>
+        </div>
+      </div>
+      <div class="page-card">
+        <div class="card-header blue">Neukunden</div>
+        <div class="card-body">
+          <p>Aspirationale Positionierung. Vergleichstabelle ohne/mit Cutting Assistant. Cutting Assistant als Kaufargument für die Maschine.</p>
+          <p>Hero: "Perfekte Schnittkanten. Vom ersten Tag an. Ohne Experten."</p>
+          <div class="target">Geschäftsführer · Einkäufer · Betriebe im Umstieg</div>
+          <div class="cta-goal" style="color:var(--b)">→ Beratungsgespräch Vertrieb</div>
+        </div>
+      </div>
+      <div class="page-card">
+        <div class="card-header dark">Forschung</div>
+        <div class="card-body">
+          <p>Wissenschaftlicher Ton. Drei Kooperationsmodelle. Offene Forschungsfragen als Einladung. Langfristige Plattformvision.</p>
+          <p>Hero: "Industrielle KI trifft Grundlagenforschung. Was könnte entstehen?"</p>
+          <div class="target">Fraunhofer · Universitäten · DFG-Gruppen</div>
+          <div class="cta-goal" style="color:var(--k)">→ Kooperationsanfrage Forschungsteam</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: LIVE DEMO -->
+<div class="slide s-demo">
+  <div class="tag">Live-Demo</div>
+  <h2>Jetzt öffnen — es läuft.</h2>
+  <p class="sub">Die Website ist eine einzelne HTML-Datei. Kein Server nötig. Doppelklick genügt. Alles ist fertig.</p>
+  <div class="demo-checklist">
+    <div class="demo-item"><div class="check">✓</div><p>Drei Subpages per Klick erreichbar</p></div>
+    <div class="demo-item"><div class="check">✓</div><p>Sprache wechseln: DE → EN → ES → NL → IT → SV → FR — instant, kein Reload</p></div>
+    <div class="demo-item"><div class="check">✓</div><p>ROI-Rechner: Schieberegler bewegen, Ergebnis erscheint in Echtzeit</p></div>
+    <div class="demo-item"><div class="check">✓</div><p>Chatbot: API-Key eintragen, sofort live — beantwortet nur Cutting-Assistant-Fragen</p></div>
+    <div class="demo-item"><div class="check">✓</div><p>Responsive: auf dem Handy genauso nutzbar wie auf dem Desktop</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 6: TECH + LANGUAGES -->
+<div class="slide s-tech">
+  <div class="top-bar"></div>
+  <div class="inner">
+    <div>
+      <div class="section-tag">Technologie</div>
+      <h2>Keine Abhängigkeiten. Kein CMS. Sofort deploybar.</h2>
+      <div class="tech-list">
+        <div class="tech-row"><div class="tech-dot"></div><span>Einzelne HTML-Datei — upload auf trumpf.com, fertig</span></div>
+        <div class="tech-row"><div class="tech-dot"></div><span>IBM Plex Sans — nächste freie Alternative zum TRUMPF Corporate Font</span></div>
+        <div class="tech-row"><div class="tech-dot"></div><span>TRUMPF-Farben exakt (#7DB500 · #1E5799 · #1A1A1A · #F2F2F2)</span></div>
+        <div class="tech-row"><div class="tech-dot"></div><span>Chrome und Firefox — vollständig getestet</span></div>
+        <div class="tech-row"><div class="tech-dot"></div><span>Responsive ab 375px (iPhone SE) bis 1440px+</span></div>
+        <div class="tech-row"><div class="tech-dot"></div><span>Anthropic API bereits verdrahtet — nur Key eintragen</span></div>
+        <div class="tech-row"><div class="tech-dot"></div><span>WCAG AA Kontrast auf allen interaktiven Elementen</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-tag">Sprachen</div>
+      <h2>Sieben Märkte. Alle Texte übersetzt.</h2>
+      <div class="lang-grid">
+        <div class="lang-pill featured">DE</div>
+        <div class="lang-pill featured">EN</div>
+        <div class="lang-pill">ES</div>
+        <div class="lang-pill">NL</div>
+        <div class="lang-pill">IT</div>
+        <div class="lang-pill">SV</div>
+        <div class="lang-pill">FR</div>
+        <div class="lang-pill" style="background:#fff;color:#bbb;border:1px dashed #ccc;font-size:.75rem">+ beliebig</div>
+      </div>
+      <p style="font-size:.85rem;color:#555;margin-top:20px;line-height:1.5">Alle Strings sind in einem zentralen JSON-Objekt. Eine neue Sprache hinzufügen dauert unter einer Stunde.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: CHATBOT -->
+<div class="slide s-chat">
+  <div class="inner">
+    <div>
+      <div class="section-tag">KI-Chatbot</div>
+      <h2>Ein Spezialist. Kein Generalist.</h2>
+      <p>Der eingebettete Chatbot beantwortet ausschließlich Fragen zum Cutting Assistant. Er kennt beide Betriebsmodi, alle technischen Voraussetzungen, die Forschungskooperationsmodelle und alle Inhalte aus den öffentlichen Pressemitteilungen.</p>
+      <p>Fragen zu anderen TRUMPF-Produkten, zu Preisen oder zu nicht-relevanten Themen werden höflich abgewiesen. Das Modell antwortet automatisch in der Sprache des Nutzers.</p>
+      <p style="margin-top:8px;font-size:.85rem;color:rgba(255,255,255,.4)">Basis: Claude Sonnet 4 via Anthropic API. System-Prompt bereits im Code hinterlegt. Deployment-Aufwand: ein API-Key, fünf Minuten.</p>
+    </div>
+    <div class="chat-mock">
+      <div class="chat-mock-header">
+        <div class="dot-row"><span></span><span></span><span></span></div>
+        <div class="title">Cutting Assistant · Frag mich alles</div>
+      </div>
+      <div class="chat-mock-body">
+        <div class="cm-bot">Willkommen beim TRUMPF Cutting Assistant. Stellen Sie mir Ihre Fragen zu Funktionen, Materialien oder Kooperationsmöglichkeiten.</div>
+        <div class="cm-user">Welche Materialdicken unterstützt der KI-Modus?</div>
+        <div class="cm-bot">Im KI-Modus unterstützt der Cutting Assistant aktuell Baustahl mit Stickstoff in Dicken von 5 bis 15 mm. Der Bandbreiten-Modus deckt den gesamten Bereich von 1 bis 40 mm für Baustahl, Edelstahl und (ab März 2026) Aluminium ab.</div>
+      </div>
+      <div class="chat-mock-input">
+        <span>Ihre Frage zum Cutting Assistant...</span>
+        <div class="send">→</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: RESEARCH ANGLE -->
+<div class="slide s-research">
+  <div class="inner">
+    <div class="section-tag">Strategische Differenzierung</div>
+    <h2>Die Research-Seite ist neu. Und sie ist das Mutigste.</h2>
+    <div class="tiers-row">
+      <div class="tier">
+        <div class="tier-label">Tier 1</div>
+        <div class="tier-title">Anonymisiertes Datensharing</div>
+        <div class="tier-body">Kuratierte Felddaten für Universitäten und Benchmark-Studien. Kein IP-Risiko. Externer Validierungsnutzen für TRUMPF.</div>
+      </div>
+      <div class="tier">
+        <div class="tier-label">Tier 2</div>
+        <div class="tier-title">Weight Sharing / Federated Learning</div>
+        <div class="tier-body">Partner trainieren lokal, senden nur Gewichts-Deltas zurück. Keine Rohdaten verlassen das System. TRUMPF aggregiert und verbessert das Globalmodell.</div>
+      </div>
+      <div class="tier">
+        <div class="tier-label">Tier 3</div>
+        <div class="tier-title">On-Premise Code Collaboration</div>
+        <div class="tier-body">Exportierbare Modellarchitektur für strategische Partner. IP am Basismodell verbleibt bei TRUMPF. Branchenspezifische Spezialisierung möglich.</div>
+      </div>
+    </div>
+    <p style="color:rgba(255,255,255,.5);font-size:.9rem;margin-top:28px;max-width:820px;line-height:1.6">Diese Seite ist die einzige öffentliche Kommunikation dieser Strategie — und positioniert TRUMPF nicht als Maschinenhersteller, sondern als Plattformpartner für industrielle KI. Kein Wettbewerber tut das heute.</p>
+  </div>
+</div>
+
+<!-- SLIDE 9: ROI -->
+<div class="slide s-roi">
+  <div class="top-bar"></div>
+  <div class="inner">
+    <div class="section-tag">Warum jetzt</div>
+    <h2>Was jede Woche ohne Landing Page kostet.</h2>
+    <div class="roi-blocks">
+      <div class="roi-block">
+        <div class="num">∞</div>
+        <div class="label">Verpasste Upgrade-Anfragen</div>
+        <div class="note">Bestandskunden, die den Cutting Assistant noch nicht kennen, können ihn nicht anfragen. Ohne Landing Page gibt es keinen Conversion-Kanal.</div>
+      </div>
+      <div class="roi-block">
+        <div class="num">7</div>
+        <div class="label">Märkte ohne digitale Präsenz</div>
+        <div class="note">DE, EN, ES, NL, IT, SV, FR — alle ohne dedizierten Einstiegspunkt für den Cutting Assistant. Jede Woche, die vergeht, ist verlorene Sichtbarkeit.</div>
+      </div>
+      <div class="roi-block">
+        <div class="num">0h</div>
+        <div class="label">Deploymentaufwand IT</div>
+        <div class="note">Die Datei kann heute auf trumpf.com hochgeladen werden. Kein Entwicklungsaufwand. Keine Abhängigkeit von internen Ressourcen.</div>
+      </div>
+    </div>
+    <div class="roi-source">Quelle: ROI-Rechner auf der Bestandskunden-Seite basiert auf realen Fertigungskosten (85 EUR/h, 5h/Woche Parametersuche = 20.400 EUR/Jahr Einsparung pro Betrieb)</div>
+  </div>
+</div>
+
+<!-- SLIDE 10: DEPLOY TOMORROW -->
+<div class="slide s-deploy">
+  <h2>Deploy.<br>Tomorrow.</h2>
+  <p class="sub">Die Website ist fertig. Getestet. Responsive. Mehrsprachig. Der einzige fehlende Schritt ist Ihre Entscheidung.</p>
+  <div class="deploy-grid">
+    <div class="deploy-item">
+      <div class="d-num">1</div>
+      <div class="d-label">HTML-Datei auf trumpf.com hochladen</div>
+    </div>
+    <div class="deploy-item">
+      <div class="d-num">2</div>
+      <div class="d-label">Anthropic API-Key für den Chatbot hinterlegen</div>
+    </div>
+    <div class="deploy-item">
+      <div class="d-num">3</div>
+      <div class="d-label">Echte Produktfotos einbinden (optional)</div>
+    </div>
+    <div class="deploy-item">
+      <div class="d-num">4</div>
+      <div class="d-label">Link von Newsroom und Produktseite setzen</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: ASK -->
+<div class="slide s-ask">
+  <div class="tag">Entscheidung</div>
+  <h2>Drei Fragen.<br>Keine Folgekosten.</h2>
+  <p class="sub">Was wir heute von Ihnen brauchen, um morgen live zu gehen.</p>
+  <div class="ask-items">
+    <div class="ask-item"><div class="num">01</div><p>Freigabe zur Veröffentlichung der HTML-Datei auf trumpf.com oder einer Subdomain</p></div>
+    <div class="ask-item"><div class="num">02</div><p>Bereitstellung eines Anthropic API-Keys (oder Weiterleitung an ein Backend-Team für 30 Minuten Konfiguration)</p></div>
+    <div class="ask-item"><div class="num">03</div><p>Kontakt zum Produktmarketing-Team für Austausch der Bildplatzhalter durch echte TRUMPF-Fotografie</p></div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+
+const dotsEl = document.getElementById('navDots');
+const progressEl = document.getElementById('progress');
+const numEl = document.getElementById('slideNum');
+
+slides.forEach((_,i)=>{
+  const s = document.createElement('span');
+  s.onclick = ()=>go(i);
+  dotsEl.appendChild(s);
+});
+
+function go(n){
+  n = Math.max(0, Math.min(total-1, n));
+  slides[cur].classList.remove('active');
+  cur = n;
+  slides[cur].classList.add('active');
+  progressEl.style.width = ((cur+1)/total*100)+'%';
+  numEl.textContent = String(cur+1).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
+  document.querySelectorAll('.nav-dots span').forEach((s,i)=>s.classList.toggle('active',i===cur));
+}
+
+go(0);
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ') go(cur+1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(cur-1);
+});
+
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50){dx<0?go(cur+1):go(cur-1)}
+});
+</script>
+</body>
+</html>
