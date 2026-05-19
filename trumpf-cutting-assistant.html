@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRUMPF Cutting Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --color-accent:#7DB500;
+  --color-blue:#1E5799;
+  --color-text:#1A1A1A;
+  --color-bg:#F2F2F2;
+  --color-white:#FFFFFF;
+  --border:1px solid rgba(26,26,26,0.12);
+  --shadow:0 2px 8px rgba(0,0,0,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:'IBM Plex Sans',sans-serif;font-weight:400;color:var(--color-text);background:var(--color-bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-weight:500;line-height:1.2}
+h1{font-size:clamp(2rem,4vw,3rem)}
+h2{font-size:clamp(1.5rem,3vw,2.25rem);margin-bottom:24px}
+h3{font-size:1.25rem;margin-bottom:8px}
+p{margin-bottom:8px}
+a{color:var(--color-blue);text-decoration:none}
+a:hover{text-decoration:underline}
+img{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit;font-size:1rem;padding:12px;border:var(--border);border-radius:4px;background:var(--color-white);width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--color-accent);outline-offset:1px}
+label{display:block;font-size:.875rem;margin-bottom:6px;font-weight:500}
+.container{max-width:1280px;margin:0 auto;padding:0 24px}
+.btn{display:inline-block;padding:12px 24px;border-radius:4px;font-weight:500;font-size:1rem;transition:all .2s ease;cursor:pointer;text-align:center;border:1px solid transparent}
+.btn-primary{background:var(--color-accent);color:#fff}
+.btn-primary:hover{background:#6ca300;text-decoration:none;color:#fff}
+.btn-outline{background:transparent;color:var(--color-accent);border-color:var(--color-accent)}
+.btn-outline:hover{background:var(--color-accent);color:#fff;text-decoration:none}
+.btn-white{background:#fff;color:var(--color-blue)}
+.btn-white-outline{background:transparent;color:#fff;border-color:#fff}
+.btn-blue{background:var(--color-blue);color:#fff}
+.btn-blue:hover{background:#174980;color:#fff;text-decoration:none}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:50;background:#fff;border-bottom:var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;gap:24px}
+.logo{font-weight:700;font-size:1.25rem;letter-spacing:.5px;color:var(--color-text)}
+.nav-links{display:flex;gap:32px;flex:1;justify-content:center}
+.nav-links a{color:var(--color-text);font-weight:500;padding:8px 0;border-bottom:2px solid transparent;cursor:pointer}
+.nav-links a.active{border-bottom-color:var(--color-accent)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.lang-switch{display:flex;gap:8px;font-size:.875rem}
+.lang-switch button{padding:4px 6px;color:var(--color-text);font-weight:500;border-bottom:2px solid transparent}
+.lang-switch button.active{border-bottom-color:var(--color-accent);color:var(--color-text)}
+.hamburger{display:none;width:40px;height:40px;flex-direction:column;justify-content:center;align-items:center;gap:5px}
+.hamburger span{width:24px;height:2px;background:var(--color-text)}
+.mobile-menu{display:none;position:fixed;inset:64px 0 0;background:#fff;z-index:40;padding:32px 24px;flex-direction:column;gap:24px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-size:1.25rem;color:var(--color-text);font-weight:500}
+
+/* Sections */
+section{padding:64px 0}
+.bg-white{background:var(--color-white)}
+.bg-off{background:var(--color-bg)}
+.bg-blue{background:var(--color-blue);color:#fff}
+.bg-blue h1,.bg-blue h2,.bg-blue h3{color:#fff}
+.bg-green{background:var(--color-accent);color:#fff}
+.bg-green h2{color:#fff}
+.bg-dark{background:#1A1A1A;color:#fff;padding:32px 0}
+
+/* Hero */
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.hero-grid p.sub{font-size:1.125rem;margin:16px 0 24px;color:#444}
+.bg-blue .hero-grid p.sub{color:rgba(255,255,255,.9)}
+.hero-ctas{display:flex;gap:16px;flex-wrap:wrap}
+.img-ph{background:#3a3a3a;color:#bbb;border-radius:8px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font-size:.875rem}
+
+.trust-bar{margin-top:32px;display:flex;gap:24px;flex-wrap:wrap;font-size:.875rem;color:#555}
+.bg-blue .trust-bar{color:rgba(255,255,255,.85)}
+.trust-bar span{display:flex;align-items:center;gap:8px}
+.trust-bar span:not(:last-child)::after{content:"·";margin-left:24px;color:var(--color-accent)}
+
+/* Cards */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.grid-3x2{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.card{background:#fff;border:var(--border);border-radius:8px;padding:24px}
+.card .icon{width:40px;height:40px;color:var(--color-accent);margin-bottom:16px}
+.card-diff{border-top:4px solid var(--color-accent)}
+.card-tier{border-left:6px solid var(--color-blue);background:#fff;border-radius:8px;padding:24px;margin-bottom:24px;border-top:var(--border);border-right:var(--border);border-bottom:var(--border)}
+.tier-badge{display:inline-block;background:var(--color-blue);color:#fff;padding:4px 10px;border-radius:4px;font-size:.75rem;font-weight:500;margin-bottom:8px}
+.tier-row{margin:8px 0;font-size:.95rem}
+.tier-row b{display:inline-block;min-width:140px;font-weight:500;color:#555}
+.research-card{background:#fff;border:var(--border);border-radius:8px;padding:24px;position:relative}
+.research-num{display:inline-flex;width:32px;height:32px;background:var(--color-blue);color:#fff;border-radius:4px;align-items:center;justify-content:center;font-weight:500;margin-bottom:12px}
+
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.step{background:#fff;border:var(--border);border-radius:8px;padding:24px}
+.step-num{font-size:3rem;font-weight:500;color:var(--color-accent);line-height:1;margin-bottom:8px}
+
+/* Table */
+.specs-table{width:100%;border-collapse:collapse;margin:24px 0}
+.specs-table th,.specs-table td{text-align:left;padding:12px;border-bottom:var(--border);font-size:.95rem}
+.specs-table th{font-weight:500;background:var(--color-bg)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.dot-green{background:var(--color-accent)}
+.dot-grey{background:#999}
+.info-box{background:rgba(125,181,0,.1);border-left:4px solid var(--color-accent);padding:16px;border-radius:4px;margin:16px 0}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.pill{background:var(--color-bg);padding:6px 12px;border-radius:4px;font-size:.875rem;border:var(--border)}
+.bg-dark .pill{background:#2a2a2a;color:#fff;border-color:#444}
+
+/* Comparison */
+.compare{width:100%;border-collapse:collapse;margin-top:16px}
+.compare th,.compare td{padding:14px;text-align:left;border-bottom:var(--border);font-size:.95rem;vertical-align:top}
+.compare th{font-weight:500}
+.compare th.left{background:#444;color:#fff}
+.compare th.right{background:var(--color-accent);color:#fff}
+
+/* ROI */
+.roi-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+.roi-inputs{display:grid;gap:16px}
+.roi-results{background:#fff;border:var(--border);border-radius:8px;padding:24px}
+.roi-results .row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:var(--border);font-size:.95rem}
+.roi-big{font-size:2rem;color:var(--color-accent);font-weight:500;margin-top:16px}
+.disclaimer{font-size:.75rem;color:#666;margin-top:12px}
+
+/* Quotes */
+.quote-card{background:#fff;border:var(--border);border-radius:8px;padding:32px;position:relative}
+.quote-mark{font-size:4rem;color:var(--color-accent);line-height:.5;position:absolute;top:24px;left:16px}
+.quote-text{font-style:italic;margin:24px 0 16px;padding-left:32px;font-size:1.05rem}
+.quote-attr{padding-left:32px;font-size:.875rem;color:#555}
+.pull-quote{font-size:1.5rem;font-style:italic;line-height:1.4;border-left:4px solid var(--color-blue);padding:16px 0 16px 24px;margin:16px 0}
+.pull-attr{font-size:.95rem;color:#555;padding-left:28px}
+
+/* FAQ */
+.faq-item{background:#fff;border:var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden}
+.faq-q{width:100%;text-align:left;padding:16px 24px;font-weight:500;display:flex;justify-content:space-between;align-items:center;background:#fff;color:var(--color-text)}
+.faq-q::after{content:"+";color:var(--color-accent);font-size:1.5rem;line-height:1}
+.faq-item.open .faq-q::after{content:"–"}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .2s ease;padding:0 24px}
+.faq-item.open .faq-a{max-height:500px;padding:0 24px 16px}
+
+/* Forms */
+.form{display:grid;gap:16px;max-width:720px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form .success{background:var(--color-accent);color:#fff;padding:16px;border-radius:4px;display:none}
+.form .success.show{display:block}
+.bg-green .form input,.bg-green .form select,.bg-green .form textarea{background:#fff;color:var(--color-text)}
+.bg-green label{color:#fff}
+.privacy{font-size:.75rem;color:#666;margin-top:8px}
+.bg-green .privacy{color:rgba(255,255,255,.85)}
+.char-count{font-size:.75rem;color:#666;text-align:right;margin-top:4px}
+.checkbox-group,.radio-group{display:flex;flex-wrap:wrap;gap:12px}
+.checkbox-group label,.radio-group label{display:flex;align-items:center;gap:6px;font-weight:400;margin:0}
+.checkbox-group input,.radio-group input{width:auto;padding:0;margin:0}
+
+/* Chatbot */
+.chatbot-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:var(--color-accent);color:#fff;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);z-index:60;font-size:1.5rem}
+.chat-panel{position:fixed;bottom:24px;right:24px;width:380px;height:540px;background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.15);display:none;flex-direction:column;z-index:70;overflow:hidden}
+.chat-panel.open{display:flex}
+.chat-header{background:var(--color-text);color:#fff;padding:16px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.chat-header .logo{color:#fff;font-size:.95rem}
+.chat-header .title{flex:1;font-size:.875rem}
+.chat-header button{color:#fff;font-size:1.5rem;width:28px;height:28px}
+.chat-feed{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--color-bg)}
+.chat-msg{max-width:80%;padding:10px 14px;border-radius:8px;font-size:.9rem;line-height:1.4;word-wrap:break-word}
+.chat-msg.user{background:var(--color-accent);color:#fff;align-self:flex-end;border-bottom-right-radius:2px}
+.chat-msg.bot{background:#fff;color:var(--color-text);align-self:flex-start;border-bottom-left-radius:2px;border:var(--border)}
+.chat-bot-row{display:flex;gap:8px;align-items:flex-end;max-width:90%}
+.chat-bot-row .avatar{width:24px;height:24px;background:var(--color-text);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0}
+.chat-input-row{display:flex;gap:8px;padding:12px;border-top:var(--border);background:#fff;flex-shrink:0}
+.chat-input-row input{flex:1;padding:10px;font-size:.9rem}
+.chat-input-row button{background:var(--color-accent);color:#fff;padding:10px 16px;border-radius:4px;font-weight:500}
+.typing{display:flex;gap:4px;padding:10px}
+.typing span{width:8px;height:8px;background:#999;border-radius:50%;animation:bounce 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-6px);opacity:1}}
+
+/* Page switching */
+.page{display:none}
+.page.active{display:block}
+
+/* Responsive */
+@media (max-width:900px){
+  .nav-links{display:none}
+  .lang-switch{display:none}
+  .hamburger{display:flex}
+  .nav .btn{display:none}
+  .chatbot-fab{display:flex}
+  .hero-grid,.grid-2,.grid-3,.grid-4,.steps,.grid-3x2,.roi-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  section{padding:48px 0}
+  h1{font-size:1.875rem}
+  h2{font-size:1.5rem}
+  .chat-panel{inset:0;width:100%;height:100%;border-radius:0;bottom:0;right:0}
+  .compare-wrap{overflow-x:auto}
+  .compare{min-width:600px}
+}
+@media (min-width:901px){
+  .chatbot-fab{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <div class="logo">TRUMPF</div>
+    <div class="nav-links">
+      <a data-page="existing" class="active" data-i18n="nav.existing">Bestandskunden</a>
+      <a data-page="new" data-i18n="nav.new">Neukunden</a>
+      <a data-page="research" data-i18n="nav.research">Forschung</a>
+    </div>
+    <div class="nav-right">
+      <div class="lang-switch" id="langSwitch"></div>
+      <button class="btn btn-primary" id="openChat" data-i18n="nav.openChat">Chatbot öffnen</button>
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a data-page="existing" data-i18n="nav.existing">Bestandskunden</a>
+    <a data-page="new" data-i18n="nav.new">Neukunden</a>
+    <a data-page="research" data-i18n="nav.research">Forschung</a>
+    <div class="lang-switch" id="langSwitchMobile" style="display:flex"></div>
+  </div>
+</nav>
+
+<!-- PAGE: EXISTING -->
+<main id="page-existing" class="page active">
+  <section class="bg-off">
+    <div class="container hero-grid">
+      <div>
+        <h1 data-i18n="ex.h1">Ihre Maschine kennt das Material. Jetzt lernt sie, damit umzugehen.</h1>
+        <p class="sub" data-i18n="ex.sub">Der Cutting Assistant optimiert Ihre Schneidparameter automatisch — direkt auf Ihrer bestehenden TruLaser ab 6 kW.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" data-i18n="ex.cta1">Jetzt freischalten</a>
+          <a class="btn btn-outline" data-i18n="ex.cta2">Demo anschauen</a>
+        </div>
+      </div>
+      <div class="img-ph" data-i18n="ex.heroImg">Hero image: Scanner in Aktion</div>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="container">
+      <h2 data-i18n="ex.problemH">Kennen Sie das?</h2>
+      <div class="grid-3">
+        <div class="card"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 22h20L12 2zM12 9v6M12 18v.5"/></svg><h3 data-i18n="ex.p1t">Schlechte Kanten bei Sondermaterial</h3><p data-i18n="ex.p1b">Ihr Referenzmaterial funktioniert einwandfrei. Aber sobald eine neue Charge kommt oder ein Kunde ein Sondermaterial bestellt, beginnt die manuelle Suche nach den richtigen Parametern — von vorne.</p></div>
+        <div class="card"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><h3 data-i18n="ex.p2t">Stundenlange Parametersuche</h3><p data-i18n="ex.p2b">Ein erfahrener Mitarbeiter verbringt Stunden damit, Parameter einzeln zu verstellen. Zeit, die in Produktion fehlt.</p></div>
+        <div class="card"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 22c0-4 4-7 8-7s8 3 8 7M12 18v.5"/></svg><h3 data-i18n="ex.p3t">Wissen geht verloren</h3><p data-i18n="ex.p3b">Wenn der erfahrene Bediener krank ist oder das Unternehmen verlässt, ist das Parameterwissen weg. Der nächste fängt von vorne an.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-off">
+    <div class="container">
+      <h2 data-i18n="ex.howH">So funktioniert der Cutting Assistant</h2>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><h3 data-i18n="ex.s1t">Scannen</h3><p data-i18n="ex.s1b">Schnittkante mit dem Handscanner erfassen. Das dauert Sekunden.</p></div>
+        <div class="step"><div class="step-num">2</div><h3 data-i18n="ex.s2t">Bewerten lassen</h3><p data-i18n="ex.s2b">Die KI analysiert Rauheit und Grathöhe in Mikrometern. Objektiv und reproduzierbar.</p></div>
+        <div class="step"><div class="step-num">3</div><h3 data-i18n="ex.s3t">Optimierung übernehmen</h3><p data-i18n="ex.s3b">Der Cutting Assistant schlägt neue Parameter vor. Sie bestätigen. Die Maschine schneidet erneut.</p></div>
+        <div class="step"><div class="step-num">4</div><h3 data-i18n="ex.s4t">Fertig</h3><p data-i18n="ex.s4b">Nach ca. 5 Durchläufen: perfekte Schnittkante, dokumentierte Parameter, kein Expertenwissen verbraucht.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="container">
+      <h2 data-i18n="ex.specH">Was der Cutting Assistant heute kann</h2>
+      <div style="overflow-x:auto">
+      <table class="specs-table">
+        <thead><tr><th data-i18n="ex.tCol1">Modus</th><th data-i18n="ex.tCol2">Material</th><th data-i18n="ex.tCol3">Dicke</th><th data-i18n="ex.tCol4">Status</th></tr></thead>
+        <tbody>
+          <tr><td data-i18n="ex.tR1c1">KI-Modus</td><td data-i18n="ex.tR1c2">Baustahl Stickstoff</td><td>5–15 mm</td><td><span class="dot dot-green"></span><span data-i18n="ex.avail">Verfügbar</span></td></tr>
+          <tr><td data-i18n="ex.tR2c1">Bandbreiten-Modus</td><td>Baustahl N2 / O2 / Gasmix</td><td>1–40 mm</td><td><span class="dot dot-green"></span><span data-i18n="ex.avail">Verfügbar</span></td></tr>
+          <tr><td data-i18n="ex.tR2c1">Bandbreiten-Modus</td><td data-i18n="ex.tR3c2">Edelstahl Stickstoff</td><td>1–40 mm</td><td><span class="dot dot-green"></span><span data-i18n="ex.avail">Verfügbar</span></td></tr>
+          <tr><td data-i18n="ex.tR2c1">Bandbreiten-Modus</td><td>Aluminium N2 / Gasmix</td><td data-i18n="ex.tR4c3">ab März 2026</td><td><span class="dot dot-grey"></span><span data-i18n="ex.soon">Coming soon</span></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="info-box" data-i18n="ex.retrofit">Sie haben eine ältere Maschine? Sprechen Sie mit Ihrem TRUMPF-Ansprechpartner über verfügbare Retrofit-Optionen.</div>
+      <div class="pills">
+        <span class="pill">TruLaser 2D Serie</span>
+        <span class="pill" data-i18n="ex.pill2">min. 6 kW</span>
+        <span class="pill" data-i18n="ex.pill3">Kauf ab Mai 2025</span>
+        <span class="pill" data-i18n="ex.pill4">Online-Update</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-off">
+    <div class="container">
+      <h2 data-i18n="ex.roiH">Was sparen Sie konkret?</h2>
+      <div class="roi-grid">
+        <div class="roi-inputs">
+          <div><label data-i18n="ex.roi1">Stunden/Woche mit Parametersuche</label><input type="number" id="roi-hours" value="5" min="0"></div>
+          <div><label data-i18n="ex.roi2">Produktionskosten EUR/Stunde</label><input type="number" id="roi-cost" value="85" min="0"></div>
+          <div><label data-i18n="ex.roi3">Ausschussteile pro Woche</label><input type="number" id="roi-scrap" value="3" min="0"></div>
+          <div><label data-i18n="ex.roi4">Materialwert pro Teil in EUR</label><input type="number" id="roi-mat" value="120" min="0"></div>
+        </div>
+        <div class="roi-results">
+          <div class="row"><span data-i18n="ex.roiTime">Zeitersparnis pro Monat</span><b id="roi-time">1.700 EUR/Monat</b></div>
+          <div class="row"><span data-i18n="ex.roiScrap">Ausschussreduktion pro Monat</span><b>ca. <span id="roi-scrapv">1.152</span> EUR/Monat</b></div>
+          <div class="row" style="border-bottom:none"><span data-i18n="ex.roiTotal">Gesamtpotenzial pro Jahr</span></div>
+          <div class="roi-big" id="roi-total">34.224 EUR/Jahr</div>
+          <p class="disclaimer" data-i18n="ex.roiDisc">Schätzung auf Basis Ihrer Angaben. Sprechen Sie mit Ihrem TRUMPF-Berater für eine individuelle Analyse.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="container">
+      <h2 data-i18n="ex.testH">Was Anwender sagen</h2>
+      <div class="grid-2">
+        <div class="quote-card"><span class="quote-mark">“</span><p class="quote-text" data-i18n="ex.q1">Früher habe ich eine Stunde gebraucht, um gute Parameter für ein neues Blech zu finden. Jetzt sind es fünf Schnitte.</p><p class="quote-attr" data-i18n="ex.q1a">— Maschinenführer, Lohnfertiger</p></div>
+        <div class="quote-card"><span class="quote-mark">“</span><p class="quote-text" data-i18n="ex.q2">Wir haben den Cutting Assistant an einem Freitag aktiviert. Am Montag haben unsere Auszubildenden damit gearbeitet — ohne Einweisung.</p><p class="quote-attr" data-i18n="ex.q2a">— Fertigungsleiter</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-off">
+    <div class="container" style="max-width:900px">
+      <h2 data-i18n="ex.faqH">Häufige Fragen</h2>
+      <div id="faqList">
+        <div class="faq-item"><button class="faq-q" data-i18n="ex.faq1q">Muss ich meine Maschine neu kaufen?</button><div class="faq-a"><p data-i18n="ex.faq1a">Nein. Der Cutting Assistant ist für alle TruLaser ab 6 kW verfügbar, die ab Mai 2025 gekauft oder nachgerüstet wurden.</p></div></div>
+        <div class="faq-item"><button class="faq-q" data-i18n="ex.faq2q">Werden meine Materialdaten übertragen?</button><div class="faq-a"><p data-i18n="ex.faq2a">Ihre Daten bleiben anonym. TRUMPF erhält keine Informationen, die Rückschlüsse auf Ihre Expertise zulassen.</p></div></div>
+        <div class="faq-item"><button class="faq-q" data-i18n="ex.faq3q">Wie lange dauert die Einrichtung?</button><div class="faq-a"><p data-i18n="ex.faq3a">Der Cutting Assistant wird per Online-Update eingespielt. Keine Montage, kein Stillstand.</p></div></div>
+        <div class="faq-item"><button class="faq-q" data-i18n="ex.faq4q">Funktioniert das mit Sondermaterial ohne Lasergüte?</button><div class="faq-a"><p data-i18n="ex.faq4a">Ja. Genau dafür wurde der Cutting Assistant entwickelt.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-green">
+    <div class="container">
+      <h2 data-i18n="ex.ctaH">Bereit, Ihre Schnittkanten zu verbessern?</h2>
+      <form class="form" onsubmit="return submitForm(event)">
+        <div class="success" data-i18n="form.success">Vielen Dank. Wir melden uns innerhalb von 2 Werktagen.</div>
+        <div class="form-row"><div><label data-i18n="form.name">Name</label><input required></div><div><label data-i18n="form.company">Unternehmen</label><input required></div></div>
+        <div class="form-row"><div><label data-i18n="form.machine">Maschinennummer</label><input></div><div><label data-i18n="form.email">E-Mail</label><input type="email" required></div></div>
+        <div><label data-i18n="form.phone">Telefon</label><input type="tel"></div>
+        <div><label data-i18n="form.message">Nachricht</label><textarea rows="4"></textarea></div>
+        <button class="btn btn-white" type="submit" style="justify-self:start" data-i18n="form.submit">Absenden</button>
+        <p class="privacy" data-i18n="form.privacy">Datenschutzerklärung</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- PAGE: NEW -->
+<main id="page-new" class="page">
+  <section class="bg-white">
+    <div class="container hero-grid">
+      <div>
+        <h1 data-i18n="nw.h1">Perfekte Schnittkanten. Vom ersten Tag an. Ohne Experten.</h1>
+        <p class="sub" data-i18n="nw.sub">Der TRUMPF Cutting Assistant nutzt Künstliche Intelligenz, um Ihre Laserschneidparameter automatisch zu optimieren — egal welches Material, egal wie erfahren Ihr Team ist.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" data-i18n="nw.cta1">Jetzt Beratung anfragen</a>
+          <a class="btn btn-outline" data-i18n="nw.cta2">Wie es funktioniert</a>
+        </div>
+        <div class="trust-bar"><span data-i18n="nw.t1">Über 100 Jahre Fertigungserfahrung</span><span data-i18n="nw.t2">Weltmarktführer Lasertechnologie</span><span data-i18n="nw.t3">KI-Innovation seit 2025</span></div>
+      </div>
+      <div class="img-ph" data-i18n="nw.heroImg">Hero image: TruLaser Maschine</div>
+    </div>
+  </section>
+
+  <section class="bg-off">
+    <div class="container grid-2">
+      <h2 data-i18n="nw.ctxH">Die Herausforderung in der modernen Fertigung</h2>
+      <div>
+        <p data-i18n="nw.ctx1">Fachkräfte sind schwer zu finden. Materialqualitäten schwanken. Toleranzanforderungen steigen.</p>
+        <p data-i18n="nw.ctx2">Wer heute eine Laserschneidmaschine kauft, entscheidet damit, wie wettbewerbsfähig sein Betrieb in fünf Jahren ist.</p>
+        <p data-i18n="nw.ctx3">Der Cutting Assistant ist TRUMPFs Antwort auf diese Realität.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="container grid-2">
+      <div class="img-ph" data-i18n="nw.prodImg">Produktbild / Screencast</div>
+      <div>
+        <h2 data-i18n="nw.prodH">Der Cutting Assistant — KI in Ihrer Produktion</h2>
+        <p data-i18n="nw.prod1">Vollständig integriert in die TruLaser-Steuerung. Keine separate Hardware, keine zusätzliche Schulung.</p>
+        <p data-i18n="nw.prod2">Scannen, bewerten, anwenden — ein dreistufiger Workflow, der jeden Bediener zum Parameterexperten macht.</p>
+        <p data-i18n="nw.prod3">Nach durchschnittlich fünf Iterationen liefert das System eine optimierte Schnittkante, dokumentiert für die nächste Charge.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-off">
+    <div class="container">
+      <h2 data-i18n="nw.diffH">Was andere Maschinen nicht können</h2>
+      <div class="grid-3">
+        <div class="card card-diff"><h3 data-i18n="nw.d1t">Objektive Qualitätsbewertung</h3><p data-i18n="nw.d1b">Kein Bauchgefühl. Der Scanner misst, die KI bewertet — in Mikrometern, reproduzierbar, dokumentiert.</p></div>
+        <div class="card card-diff"><h3 data-i18n="nw.d2t">Für jedes Material</h3><p data-i18n="nw.d2b">Nicht-Lasergütematerial, Sonderstähle, schwankende Chargen — der Cutting Assistant passt Parameter an das Material an, nicht umgekehrt.</p></div>
+        <div class="card card-diff"><h3 data-i18n="nw.d3t">Ein System, das dazulernt</h3><p data-i18n="nw.d3b">Jedes Software-Update, das Sie per Download erhalten, macht das System besser. Ohne Aufpreis, ohne Unterbrechung.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="container">
+      <h2 data-i18n="nw.cmpH">Was Ihr Team ohne Cutting Assistant macht — und was danach möglich ist</h2>
+      <div class="compare-wrap">
+      <table class="compare">
+        <thead><tr><th class="left" data-i18n="nw.cmpL">Ohne Cutting Assistant</th><th class="right" data-i18n="nw.cmpR">Mit Cutting Assistant</th></tr></thead>
+        <tbody>
+          <tr><td data-i18n="nw.c1l">Stundenlange manuelle Parametersuche</td><td data-i18n="nw.c1r">Optimierung in wenigen Schnittdurchläufen</td></tr>
+          <tr><td data-i18n="nw.c2l">Abhängigkeit von Expertenwissen</td><td data-i18n="nw.c2r">Jeder Bediener kann optimieren</td></tr>
+          <tr><td data-i18n="nw.c3l">Ausschuss bei Sondermaterialien</td><td data-i18n="nw.c3r">Passgenaue Parameter für jede Charge</td></tr>
+          <tr><td data-i18n="nw.c4l">Wissen geht beim Personalwechsel verloren</td><td data-i18n="nw.c4r">Parameter bleiben dokumentiert im System</td></tr>
+          <tr><td data-i18n="nw.c5l">Subjektive Qualitätsbewertung</td><td data-i18n="nw.c5r">Objektive Messung in Mikrometern</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-off">
+    <div class="container" style="max-width:900px">
+      <p class="pull-quote" data-i18n="nw.eq">"The Cutting Assistant is a great example of how AI-enabled tools can help overcome problems related to the skilled worker shortage and also saves time and money."</p>
+      <p class="pull-attr">— Grant Fergusson, TRUMPF Inc. TruLaser Product Manager</p>
+    </div>
+  </section>
+
+  <section class="bg-dark">
+    <div class="container">
+      <div style="display:flex;gap:32px;flex-wrap:wrap;justify-content:space-around;font-size:.95rem">
+        <span>⚙ TruLaser 2D Serie</span>
+        <span>⚡ <span data-i18n="nw.m2">min. 6 kW Leistung</span></span>
+        <span>📅 <span data-i18n="nw.m3">Kauf ab Mai 2025</span></span>
+        <span>⬇ <span data-i18n="nw.m4">Updates per Download</span></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="container">
+      <h2 data-i18n="nw.frmH">Bereit für Ihre erste Anfrage?</h2>
+      <p style="margin-bottom:24px" data-i18n="nw.frmSub">Erzählen Sie uns von Ihrer Fertigung. Wir melden uns mit einer individuellen Einschätzung.</p>
+      <form class="form" onsubmit="return submitForm(event)">
+        <div class="success" data-i18n="form.success">Vielen Dank. Wir melden uns innerhalb von 2 Werktagen.</div>
+        <div class="form-row"><div><label data-i18n="form.first">Vorname</label><input required></div><div><label data-i18n="form.last">Nachname</label><input required></div></div>
+        <div><label data-i18n="form.company">Unternehmen</label><input required></div>
+        <div class="form-row">
+          <div><label data-i18n="form.industry">Branche</label><select><option data-i18n="form.indOpt1">Lohnfertigung</option><option data-i18n="form.indOpt2">Maschinenbau</option><option>Automotive</option><option data-i18n="form.indOpt4">Medizintechnik</option><option data-i18n="form.indOpt5">Sonstiges</option></select></div>
+          <div><label data-i18n="form.country">Land</label><input></div>
+        </div>
+        <div class="form-row"><div><label data-i18n="form.email">E-Mail</label><input type="email" required></div><div><label data-i18n="form.phone">Telefon</label><input type="tel"></div></div>
+        <div><label data-i18n="nw.matsQ">Welche Materialien schneiden Sie hauptsächlich?</label><input></div>
+        <div><label data-i18n="form.employees">Mitarbeiterzahl</label><select><option>1–10</option><option>11–50</option><option>51–250</option><option>250+</option></select></div>
+        <div><label data-i18n="form.message">Nachricht</label><textarea rows="4"></textarea></div>
+        <button class="btn btn-primary" type="submit" style="justify-self:start" data-i18n="nw.frmCta">Beratungsgespräch anfragen</button>
+        <p class="privacy" data-i18n="form.privacy">Datenschutzerklärung</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- PAGE: RESEARCH -->
+<main id="page-research" class="page">
+  <section class="bg-blue">
+    <div class="container hero-grid">
+      <div>
+        <h1 data-i18n="rs.h1">Industrielle KI trifft auf Grundlagenforschung. Was könnte entstehen?</h1>
+        <p class="sub" data-i18n="rs.sub">TRUMPF öffnet das Ökosystem des Cutting Assistants für Forschungspartner — von Datenzugang bis zu gemeinsamer Modellentwicklung.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-white" data-i18n="rs.cta1">Kooperationsgespräch anfragen</a>
+          <a class="btn btn-white-outline" data-i18n="rs.cta2">Technisches Whitepaper herunterladen</a>
+        </div>
+        <div class="trust-bar"><span data-i18n="rs.t1">518,5 Mio. EUR F+E-Budget</span><span data-i18n="rs.t2">3.006 Mitarbeiter in der Produktentwicklung</span><span data-i18n="rs.t3">Globale Forschungspartnerschaften</span></div>
+      </div>
+      <div class="img-ph" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" data-i18n="rs.heroImg">Heatmap-Overlay Schnittkante</div>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="container" style="max-width:900px">
+      <h2 data-i18n="rs.whyH">Was kein Labor der Welt hat — und was wir einbringen</h2>
+      <p data-i18n="rs.why1">Reale Produktionsdaten aus hunderten von Fertigungsbetrieben weltweit. Reale Materialien mit realen Chargenschwankungen. Reale Fehler, systematisch erfasst und bewertet.</p>
+      <p data-i18n="rs.why2">Diese Datenbasis ist die Grundlage, auf der industrielle KI über Demonstratoren hinauswächst — und sie ist in dieser Form nirgendwo sonst verfügbar.</p>
+      <div class="pills" style="margin-top:24px">
+        <span class="pill" data-i18n="rs.dp1">Schnittkanten-Scandaten</span>
+        <span class="pill" data-i18n="rs.dp2">Parameterpaare</span>
+        <span class="pill" data-i18n="rs.dp3">Qualitätsmetriken in µm</span>
+        <span class="pill" data-i18n="rs.dp4">Anonymisierte Materialklassen</span>
+        <span class="pill" data-i18n="rs.dp5">Optimierungsverläufe</span>
+        <span class="pill" data-i18n="rs.dp6">Multi-Maschinen-Skalierung</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-off">
+    <div class="container">
+      <h2 data-i18n="rs.tierH">Drei Wege zur Zusammenarbeit</h2>
+      <div class="card-tier">
+        <span class="tier-badge">Tier 1</span>
+        <h3 data-i18n="rs.tier1t">Datenzugang</h3>
+        <div class="tier-row"><b data-i18n="rs.tFor">Für wen:</b><span data-i18n="rs.tier1who">Algorithmenforschung, Benchmarks, Masterarbeiten</span></div>
+        <div class="tier-row"><b data-i18n="rs.tWhat">Was:</b><span data-i18n="rs.tier1what">Anonymisierte Datensätze (Scanbilder, Parameterpaare, Qualitätsmetriken)</span></div>
+        <div class="tier-row"><b data-i18n="rs.tPriv">Datenschutz:</b><span data-i18n="rs.tier1priv">Vollständige Anonymisierung — kein Rückschluss auf Betrieb möglich</span></div>
+        <div class="tier-row"><b data-i18n="rs.tGive">Gegenleistung:</b><span data-i18n="rs.tier1give">Danksagung in Publikationen, optional Modellgewichte</span></div>
+      </div>
+      <div class="card-tier">
+        <span class="tier-badge">Tier 2</span>
+        <h3 data-i18n="rs.tier2t">Weight Sharing / Federated Fine-Tuning</h3>
+        <div class="tier-row"><b data-i18n="rs.tFor">Für wen:</b><span data-i18n="rs.tier2who">Institute mit GPU-Cluster, DFG-Projekte, Promotionen</span></div>
+        <div class="tier-row"><b data-i18n="rs.tWhat">Was:</b><span data-i18n="rs.tier2what">Lokales Retraining; Austausch nur der Gewichts-Deltas — keine Rohdaten</span></div>
+        <div class="tier-row"><b data-i18n="rs.tSetup">Setup:</b><span data-i18n="rs.tier2setup">TRUMPF stellt Basismodell und Fine-Tuning-Skripte; Partner sendet Deltas; TRUMPF aggregiert und validiert</span></div>
+        <div class="tier-row"><b data-i18n="rs.tGive">Gegenleistung:</b><span data-i18n="rs.tier2give">Ko-Autorenschaft, optional Lizenzgebühren</span></div>
+      </div>
+      <div class="card-tier">
+        <span class="tier-badge">Tier 3</span>
+        <h3 data-i18n="rs.tier3t">On-Premise Deployment + Code Collaboration</h3>
+        <div class="tier-row"><b data-i18n="rs.tFor">Für wen:</b><span data-i18n="rs.tier3who">Fraunhofer-Institute, strategische Partner, Industrieforschung</span></div>
+        <div class="tier-row"><b data-i18n="rs.tWhat">Was:</b><span data-i18n="rs.tier3what">Exportierbare Modellarchitektur (Inference + Fine-Tuning-Head); gemeinsame Modulentwicklung</span></div>
+        <div class="tier-row"><b data-i18n="rs.tSetup">Setup:</b><span data-i18n="rs.tier3setup">TRUMPF behält IP am Basismodell; ko-entwickelte Erweiterungen in gemeinsam verhandeltem IP-Regime</span></div>
+        <div class="tier-row"><b data-i18n="rs.tGive">Gegenleistung:</b><span data-i18n="rs.tier3give">Ko-Entwicklungsvertrag; Zugang zu Testmaschinen bei TRUMPF</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="container">
+      <h2 data-i18n="rs.openH">Wo wir Antworten suchen — und Partner einladen</h2>
+      <div class="grid-3x2">
+        <div class="research-card"><div class="research-num">1</div><h3 data-i18n="rs.o1t">Generalisierbares Schnittkantenmodell</h3><p data-i18n="rs.o1b">Few-Shot Learning und Domänenadaption für neue Materialklassen.</p></div>
+        <div class="research-card"><div class="research-num">2</div><h3 data-i18n="rs.o2t">Unsicherheitsquantifizierung</h3><p data-i18n="rs.o2b">Konfidenzbasierte Entscheidungsunterstützung in industriellen KI-Systemen.</p></div>
+        <div class="research-card"><div class="research-num">3</div><h3 data-i18n="rs.o3t">Physik-informierte KI</h3><p data-i18n="rs.o3b">FEM-Simulation und Felddaten kombinieren für physikalisch konsistente Modelle.</p></div>
+        <div class="research-card"><div class="research-num">4</div><h3 data-i18n="rs.o4t">Erklärbarkeit (XAI)</h3><p data-i18n="rs.o4b">Welche Merkmale in Schnittkanten-Scans treiben die Parameterempfehlung?</p></div>
+        <div class="research-card"><div class="research-num">5</div><h3 data-i18n="rs.o5t">Mensch-KI-Interaktion</h3><p data-i18n="rs.o5b">Wie akzeptieren Fertigungsmitarbeiter KI-Empfehlungen, wann überstimmen sie das System?</p></div>
+        <div class="research-card"><div class="research-num">6</div><h3 data-i18n="rs.o6t">Normung und Zertifizierung</h3><p data-i18n="rs.o6b">Anforderungen an KI-Prozessoptimierung in Luftfahrt, Medizintechnik, Automotive.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-blue">
+    <div class="container" style="max-width:900px">
+      <h2 data-i18n="rs.visH">Der Cutting Assistant ist der Anfang.</h2>
+      <p data-i18n="rs.vis1">Wir bauen einen Benchmark-Datensatz für Laserparameter — vergleichbar mit dem, was ImageNet für die Bilderkennung geleistet hat.</p>
+      <p data-i18n="rs.vis2">Wir entwickeln ein föderiertes Lernnetzwerk über hunderte von Maschinen weltweit, ohne dass je ein Rohdatensatz unser Ökosystem verlässt.</p>
+      <p data-i18n="rs.vis3">Und wir arbeiten an einem Zertifizierungs-Framework für KI in der Fertigung — gemeinsam mit Normungsgremien, nicht parallel zu ihnen.</p>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="container" style="max-width:900px">
+      <h2 data-i18n="rs.crH">Wer kann Partner werden?</h2>
+      <p data-i18n="rs.cr1">Aktive Expertise in Computer Vision, Maschinellem Lernen, Fertigungstechnik oder Materialwissenschaften.</p>
+      <p data-i18n="rs.cr2">Klare wissenschaftliche Ziele — keine Auftragsforschung ohne erkenntnistheoretischen Beitrag.</p>
+      <p data-i18n="rs.cr3">Bereitschaft, Ergebnisse fair zu teilen — in Publikationen, Modellen, Daten.</p>
+      <p data-i18n="rs.cr4">Verbindlichkeit bei Daten- und IP-Vereinbarungen.</p>
+      <p style="margin-top:24px;font-style:italic" data-i18n="rs.crNote">Wir prüfen jede Anfrage individuell. Wissenschaftliches Potenzial und strategische Passung entscheiden — nicht die Größe der Einrichtung.</p>
+    </div>
+  </section>
+
+  <section class="bg-off">
+    <div class="container">
+      <h2 data-i18n="rs.frmH">Lassen Sie uns sprechen.</h2>
+      <form class="form" onsubmit="return submitForm(event)">
+        <div class="success" data-i18n="form.success">Vielen Dank. Wir melden uns innerhalb von 2 Werktagen.</div>
+        <div class="form-row"><div><label data-i18n="form.first">Vorname</label><input required></div><div><label data-i18n="form.last">Nachname</label><input required></div></div>
+        <div class="form-row"><div><label data-i18n="rs.inst">Institution</label><input required></div><div><label data-i18n="rs.pos">Position</label><input></div></div>
+        <div class="form-row">
+          <div><label data-i18n="rs.field">Fachbereich</label><select><option>ML / KI</option><option>Computer Vision</option><option data-i18n="rs.f3">Fertigungstechnik</option><option data-i18n="rs.f4">Materialwissenschaften</option><option data-i18n="rs.f5">Mensch-Maschine-Interaktion</option><option data-i18n="rs.f6">Normung / Recht / Ethik</option><option data-i18n="form.indOpt5">Sonstiges</option></select></div>
+          <div><label data-i18n="form.country">Land</label><input></div>
+        </div>
+        <div class="form-row"><div><label data-i18n="form.email">E-Mail</label><input type="email" required></div><div><label data-i18n="rs.phoneOpt">Telefon (optional)</label><input type="tel"></div></div>
+        <div><label data-i18n="rs.interest">Forschungsinteresse</label><textarea rows="4" maxlength="500" id="rs-interest" oninput="document.getElementById('rs-cc').textContent=this.value.length"></textarea><div class="char-count"><span id="rs-cc">0</span> / 500</div></div>
+        <div><label data-i18n="rs.collab">Kollaborationsmodell</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox"> <span data-i18n="rs.cb1">Datenzugang</span></label>
+            <label><input type="checkbox"> <span data-i18n="rs.cb2">Weight Sharing</span></label>
+            <label><input type="checkbox"> <span data-i18n="rs.cb3">On-Premise Deployment</span></label>
+            <label><input type="checkbox"> <span data-i18n="rs.cb4">Noch offen</span></label>
+          </div>
+        </div>
+        <div><label data-i18n="rs.funded">Drittmittelprojekt vorhanden</label>
+          <div class="radio-group">
+            <label><input type="radio" name="funded"> <span data-i18n="rs.r1">Ja</span></label>
+            <label><input type="radio" name="funded"> <span data-i18n="rs.r2">Nein</span></label>
+            <label><input type="radio" name="funded"> <span data-i18n="rs.r3">In Planung</span></label>
+          </div>
+        </div>
+        <button class="btn btn-blue" type="submit" style="justify-self:start" data-i18n="rs.frmCta">Kooperationsanfrage senden</button>
+        <p class="privacy" data-i18n="rs.frmNote">Ihre Anfrage wird innerhalb von fünf Werktagen geprüft. Alle Informationen werden vertraulich behandelt.</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- Chatbot FAB -->
+<button class="chatbot-fab" id="chatFab" aria-label="Chat">💬</button>
+
+<!-- Chat Panel -->
+<aside class="chat-panel" id="chatPanel" role="dialog" aria-label="Cutting Assistant Chat">
+  <div class="chat-header">
+    <span class="logo">TRUMPF</span>
+    <span class="title" data-i18n="chat.title">Cutting Assistant — Frag mich alles</span>
+    <button id="chatClose" aria-label="Close">×</button>
+  </div>
+  <div class="chat-feed" id="chatFeed"></div>
+  <form class="chat-input-row" id="chatForm">
+    <input id="chatInput" data-i18n-attr="placeholder|chat.placeholder" placeholder="Frage stellen..." aria-label="Message">
+    <button type="submit" data-i18n="chat.send">Senden</button>
+  </form>
+</aside>
+
+<script>
+// ===== TRANSLATIONS =====
+const T = {
+  de:{
+    nav:{existing:"Bestandskunden",new:"Neukunden",research:"Forschung",openChat:"Chatbot öffnen"},
+    form:{success:"Vielen Dank. Wir melden uns innerhalb von 2 Werktagen.",name:"Name",company:"Unternehmen",machine:"Maschinennummer",email:"E-Mail",phone:"Telefon",message:"Nachricht",submit:"Absenden",privacy:"Datenschutzerklärung",first:"Vorname",last:"Nachname",industry:"Branche",country:"Land",employees:"Mitarbeiterzahl",indOpt1:"Lohnfertigung",indOpt2:"Maschinenbau",indOpt4:"Medizintechnik",indOpt5:"Sonstiges"},
+    chat:{title:"Cutting Assistant — Frag mich alles",placeholder:"Frage stellen...",send:"Senden",error:"Es tut mir leid, es gab ein technisches Problem. Bitte versuchen Sie es erneut.",welcome:"Hallo! Ich beantworte Ihre Fragen zum TRUMPF Cutting Assistant."},
+    ex:{h1:"Ihre Maschine kennt das Material. Jetzt lernt sie, damit umzugehen.",sub:"Der Cutting Assistant optimiert Ihre Schneidparameter automatisch — direkt auf Ihrer bestehenden TruLaser ab 6 kW.",cta1:"Jetzt freischalten",cta2:"Demo anschauen",heroImg:"Hero image: Scanner in Aktion",problemH:"Kennen Sie das?",p1t:"Schlechte Kanten bei Sondermaterial",p1b:"Ihr Referenzmaterial funktioniert einwandfrei. Aber sobald eine neue Charge kommt oder ein Kunde ein Sondermaterial bestellt, beginnt die manuelle Suche nach den richtigen Parametern — von vorne.",p2t:"Stundenlange Parametersuche",p2b:"Ein erfahrener Mitarbeiter verbringt Stunden damit, Parameter einzeln zu verstellen. Zeit, die in Produktion fehlt.",p3t:"Wissen geht verloren",p3b:"Wenn der erfahrene Bediener krank ist oder das Unternehmen verlässt, ist das Parameterwissen weg. Der nächste fängt von vorne an.",howH:"So funktioniert der Cutting Assistant",s1t:"Scannen",s1b:"Schnittkante mit dem Handscanner erfassen. Das dauert Sekunden.",s2t:"Bewerten lassen",s2b:"Die KI analysiert Rauheit und Grathöhe in Mikrometern. Objektiv und reproduzierbar.",s3t:"Optimierung übernehmen",s3b:"Der Cutting Assistant schlägt neue Parameter vor. Sie bestätigen. Die Maschine schneidet erneut.",s4t:"Fertig",s4b:"Nach ca. 5 Durchläufen: perfekte Schnittkante, dokumentierte Parameter, kein Expertenwissen verbraucht.",specH:"Was der Cutting Assistant heute kann",tCol1:"Modus",tCol2:"Material",tCol3:"Dicke",tCol4:"Status",tR1c1:"KI-Modus",tR1c2:"Baustahl Stickstoff",tR2c1:"Bandbreiten-Modus",tR3c2:"Edelstahl Stickstoff",tR4c3:"ab März 2026",avail:"Verfügbar",soon:"Coming soon",retrofit:"Sie haben eine ältere Maschine? Sprechen Sie mit Ihrem TRUMPF-Ansprechpartner über verfügbare Retrofit-Optionen.",pill2:"min. 6 kW",pill3:"Kauf ab Mai 2025",pill4:"Online-Update",roiH:"Was sparen Sie konkret?",roi1:"Stunden/Woche mit Parametersuche",roi2:"Produktionskosten EUR/Stunde",roi3:"Ausschussteile pro Woche",roi4:"Materialwert pro Teil in EUR",roiTime:"Zeitersparnis pro Monat",roiScrap:"Ausschussreduktion pro Monat",roiTotal:"Gesamtpotenzial pro Jahr",roiDisc:"Schätzung auf Basis Ihrer Angaben. Sprechen Sie mit Ihrem TRUMPF-Berater für eine individuelle Analyse.",testH:"Was Anwender sagen",q1:"Früher habe ich eine Stunde gebraucht, um gute Parameter für ein neues Blech zu finden. Jetzt sind es fünf Schnitte.",q1a:"— Maschinenführer, Lohnfertiger",q2:"Wir haben den Cutting Assistant an einem Freitag aktiviert. Am Montag haben unsere Auszubildenden damit gearbeitet — ohne Einweisung.",q2a:"— Fertigungsleiter",faqH:"Häufige Fragen",faq1q:"Muss ich meine Maschine neu kaufen?",faq1a:"Nein. Der Cutting Assistant ist für alle TruLaser ab 6 kW verfügbar, die ab Mai 2025 gekauft oder nachgerüstet wurden.",faq2q:"Werden meine Materialdaten übertragen?",faq2a:"Ihre Daten bleiben anonym. TRUMPF erhält keine Informationen, die Rückschlüsse auf Ihre Expertise zulassen.",faq3q:"Wie lange dauert die Einrichtung?",faq3a:"Der Cutting Assistant wird per Online-Update eingespielt. Keine Montage, kein Stillstand.",faq4q:"Funktioniert das mit Sondermaterial ohne Lasergüte?",faq4a:"Ja. Genau dafür wurde der Cutting Assistant entwickelt.",ctaH:"Bereit, Ihre Schnittkanten zu verbessern?"},
+    nw:{h1:"Perfekte Schnittkanten. Vom ersten Tag an. Ohne Experten.",sub:"Der TRUMPF Cutting Assistant nutzt Künstliche Intelligenz, um Ihre Laserschneidparameter automatisch zu optimieren — egal welches Material, egal wie erfahren Ihr Team ist.",cta1:"Jetzt Beratung anfragen",cta2:"Wie es funktioniert",heroImg:"Hero image: TruLaser Maschine",t1:"Über 100 Jahre Fertigungserfahrung",t2:"Weltmarktführer Lasertechnologie",t3:"KI-Innovation seit 2025",ctxH:"Die Herausforderung in der modernen Fertigung",ctx1:"Fachkräfte sind schwer zu finden. Materialqualitäten schwanken. Toleranzanforderungen steigen.",ctx2:"Wer heute eine Laserschneidmaschine kauft, entscheidet damit, wie wettbewerbsfähig sein Betrieb in fünf Jahren ist.",ctx3:"Der Cutting Assistant ist TRUMPFs Antwort auf diese Realität.",prodImg:"Produktbild / Screencast",prodH:"Der Cutting Assistant — KI in Ihrer Produktion",prod1:"Vollständig integriert in die TruLaser-Steuerung. Keine separate Hardware, keine zusätzliche Schulung.",prod2:"Scannen, bewerten, anwenden — ein dreistufiger Workflow, der jeden Bediener zum Parameterexperten macht.",prod3:"Nach durchschnittlich fünf Iterationen liefert das System eine optimierte Schnittkante, dokumentiert für die nächste Charge.",diffH:"Was andere Maschinen nicht können",d1t:"Objektive Qualitätsbewertung",d1b:"Kein Bauchgefühl. Der Scanner misst, die KI bewertet — in Mikrometern, reproduzierbar, dokumentiert.",d2t:"Für jedes Material",d2b:"Nicht-Lasergütematerial, Sonderstähle, schwankende Chargen — der Cutting Assistant passt Parameter an das Material an, nicht umgekehrt.",d3t:"Ein System, das dazulernt",d3b:"Jedes Software-Update, das Sie per Download erhalten, macht das System besser. Ohne Aufpreis, ohne Unterbrechung.",cmpH:"Was Ihr Team ohne Cutting Assistant macht — und was danach möglich ist",cmpL:"Ohne Cutting Assistant",cmpR:"Mit Cutting Assistant",c1l:"Stundenlange manuelle Parametersuche",c1r:"Optimierung in wenigen Schnittdurchläufen",c2l:"Abhängigkeit von Expertenwissen",c2r:"Jeder Bediener kann optimieren",c3l:"Ausschuss bei Sondermaterialien",c3r:"Passgenaue Parameter für jede Charge",c4l:"Wissen geht beim Personalwechsel verloren",c4r:"Parameter bleiben dokumentiert im System",c5l:"Subjektive Qualitätsbewertung",c5r:"Objektive Messung in Mikrometern",eq:'"The Cutting Assistant is a great example of how AI-enabled tools can help overcome problems related to the skilled worker shortage and also saves time and money."',m2:"min. 6 kW Leistung",m3:"Kauf ab Mai 2025",m4:"Updates per Download",frmH:"Bereit für Ihre erste Anfrage?",frmSub:"Erzählen Sie uns von Ihrer Fertigung. Wir melden uns mit einer individuellen Einschätzung.",matsQ:"Welche Materialien schneiden Sie hauptsächlich?",frmCta:"Beratungsgespräch anfragen"},
+    rs:{h1:"Industrielle KI trifft auf Grundlagenforschung. Was könnte entstehen?",sub:"TRUMPF öffnet das Ökosystem des Cutting Assistants für Forschungspartner — von Datenzugang bis zu gemeinsamer Modellentwicklung.",cta1:"Kooperationsgespräch anfragen",cta2:"Technisches Whitepaper herunterladen",heroImg:"Heatmap-Overlay Schnittkante",t1:"518,5 Mio. EUR F+E-Budget",t2:"3.006 Mitarbeiter in der Produktentwicklung",t3:"Globale Forschungspartnerschaften",whyH:"Was kein Labor der Welt hat — und was wir einbringen",why1:"Reale Produktionsdaten aus hunderten von Fertigungsbetrieben weltweit. Reale Materialien mit realen Chargenschwankungen. Reale Fehler, systematisch erfasst und bewertet.",why2:"Diese Datenbasis ist die Grundlage, auf der industrielle KI über Demonstratoren hinauswächst — und sie ist in dieser Form nirgendwo sonst verfügbar.",dp1:"Schnittkanten-Scandaten",dp2:"Parameterpaare",dp3:"Qualitätsmetriken in µm",dp4:"Anonymisierte Materialklassen",dp5:"Optimierungsverläufe",dp6:"Multi-Maschinen-Skalierung",tierH:"Drei Wege zur Zusammenarbeit",tFor:"Für wen:",tWhat:"Was:",tPriv:"Datenschutz:",tGive:"Gegenleistung:",tSetup:"Setup:",tier1t:"Datenzugang",tier1who:"Algorithmenforschung, Benchmarks, Masterarbeiten",tier1what:"Anonymisierte Datensätze (Scanbilder, Parameterpaare, Qualitätsmetriken)",tier1priv:"Vollständige Anonymisierung — kein Rückschluss auf Betrieb möglich",tier1give:"Danksagung in Publikationen, optional Modellgewichte",tier2t:"Weight Sharing / Federated Fine-Tuning",tier2who:"Institute mit GPU-Cluster, DFG-Projekte, Promotionen",tier2what:"Lokales Retraining; Austausch nur der Gewichts-Deltas — keine Rohdaten",tier2setup:"TRUMPF stellt Basismodell und Fine-Tuning-Skripte; Partner sendet Deltas; TRUMPF aggregiert und validiert",tier2give:"Ko-Autorenschaft, optional Lizenzgebühren",tier3t:"On-Premise Deployment + Code Collaboration",tier3who:"Fraunhofer-Institute, strategische Partner, Industrieforschung",tier3what:"Exportierbare Modellarchitektur (Inference + Fine-Tuning-Head); gemeinsame Modulentwicklung",tier3setup:"TRUMPF behält IP am Basismodell; ko-entwickelte Erweiterungen in gemeinsam verhandeltem IP-Regime",tier3give:"Ko-Entwicklungsvertrag; Zugang zu Testmaschinen bei TRUMPF",openH:"Wo wir Antworten suchen — und Partner einladen",o1t:"Generalisierbares Schnittkantenmodell",o1b:"Few-Shot Learning und Domänenadaption für neue Materialklassen.",o2t:"Unsicherheitsquantifizierung",o2b:"Konfidenzbasierte Entscheidungsunterstützung in industriellen KI-Systemen.",o3t:"Physik-informierte KI",o3b:"FEM-Simulation und Felddaten kombinieren für physikalisch konsistente Modelle.",o4t:"Erklärbarkeit (XAI)",o4b:"Welche Merkmale in Schnittkanten-Scans treiben die Parameterempfehlung?",o5t:"Mensch-KI-Interaktion",o5b:"Wie akzeptieren Fertigungsmitarbeiter KI-Empfehlungen, wann überstimmen sie das System?",o6t:"Normung und Zertifizierung",o6b:"Anforderungen an KI-Prozessoptimierung in Luftfahrt, Medizintechnik, Automotive.",visH:"Der Cutting Assistant ist der Anfang.",vis1:"Wir bauen einen Benchmark-Datensatz für Laserparameter — vergleichbar mit dem, was ImageNet für die Bilderkennung geleistet hat.",vis2:"Wir entwickeln ein föderiertes Lernnetzwerk über hunderte von Maschinen weltweit, ohne dass je ein Rohdatensatz unser Ökosystem verlässt.",vis3:"Und wir arbeiten an einem Zertifizierungs-Framework für KI in der Fertigung — gemeinsam mit Normungsgremien, nicht parallel zu ihnen.",crH:"Wer kann Partner werden?",cr1:"Aktive Expertise in Computer Vision, Maschinellem Lernen, Fertigungstechnik oder Materialwissenschaften.",cr2:"Klare wissenschaftliche Ziele — keine Auftragsforschung ohne erkenntnistheoretischen Beitrag.",cr3:"Bereitschaft, Ergebnisse fair zu teilen — in Publikationen, Modellen, Daten.",cr4:"Verbindlichkeit bei Daten- und IP-Vereinbarungen.",crNote:"Wir prüfen jede Anfrage individuell. Wissenschaftliches Potenzial und strategische Passung entscheiden — nicht die Größe der Einrichtung.",frmH:"Lassen Sie uns sprechen.",inst:"Institution",pos:"Position",field:"Fachbereich",f3:"Fertigungstechnik",f4:"Materialwissenschaften",f5:"Mensch-Maschine-Interaktion",f6:"Normung / Recht / Ethik",phoneOpt:"Telefon (optional)",interest:"Forschungsinteresse",collab:"Kollaborationsmodell",cb1:"Datenzugang",cb2:"Weight Sharing",cb3:"On-Premise Deployment",cb4:"Noch offen",funded:"Drittmittelprojekt vorhanden",r1:"Ja",r2:"Nein",r3:"In Planung",frmCta:"Kooperationsanfrage senden",frmNote:"Ihre Anfrage wird innerhalb von fünf Werktagen geprüft. Alle Informationen werden vertraulich behandelt."}
+  },
+  en:{
+    nav:{existing:"Existing customers",new:"New customers",research:"Research",openChat:"Open chatbot"},
+    form:{success:"Thank you. We'll get back to you within 2 business days.",name:"Name",company:"Company",machine:"Machine number",email:"Email",phone:"Phone",message:"Message",submit:"Submit",privacy:"Privacy policy",first:"First name",last:"Last name",industry:"Industry",country:"Country",employees:"Number of employees",indOpt1:"Contract manufacturing",indOpt2:"Mechanical engineering",indOpt4:"Medical technology",indOpt5:"Other"},
+    chat:{title:"Cutting Assistant — Ask me anything",placeholder:"Ask a question...",send:"Send",error:"Sorry, there was a technical problem. Please try again.",welcome:"Hello! I answer questions about the TRUMPF Cutting Assistant."},
+    ex:{h1:"Your machine knows the material. Now it learns how to handle it.",sub:"The Cutting Assistant optimizes your cutting parameters automatically — directly on your existing TruLaser from 6 kW.",cta1:"Activate now",cta2:"Watch demo",heroImg:"Hero image: Scanner in action",problemH:"Sound familiar?",p1t:"Poor edges on special materials",p1b:"Your reference material works perfectly. But as soon as a new batch arrives or a customer orders a special material, the manual search for the right parameters starts — from scratch.",p2t:"Hours spent searching for parameters",p2b:"An experienced operator spends hours adjusting parameters one by one. Time missing from production.",p3t:"Knowledge gets lost",p3b:"When the experienced operator is sick or leaves the company, the parameter knowledge is gone. The next person starts from scratch.",howH:"How the Cutting Assistant works",s1t:"Scan",s1b:"Capture the cut edge with the hand scanner. It takes seconds.",s2t:"Have it evaluated",s2b:"The AI analyzes roughness and burr height in micrometers. Objective and reproducible.",s3t:"Apply optimization",s3b:"The Cutting Assistant proposes new parameters. You confirm. The machine cuts again.",s4t:"Done",s4b:"After about 5 iterations: perfect cut edge, documented parameters, no expert knowledge consumed.",specH:"What the Cutting Assistant can do today",tCol1:"Mode",tCol2:"Material",tCol3:"Thickness",tCol4:"Status",tR1c1:"AI mode",tR1c2:"Mild steel nitrogen",tR2c1:"Bandwidth mode",tR3c2:"Stainless steel nitrogen",tR4c3:"from March 2026",avail:"Available",soon:"Coming soon",retrofit:"Have an older machine? Talk to your TRUMPF contact about available retrofit options.",pill2:"min. 6 kW",pill3:"Purchase from May 2025",pill4:"Online update",roiH:"What do you actually save?",roi1:"Hours/week on parameter search",roi2:"Production costs EUR/hour",roi3:"Scrap parts per week",roi4:"Material value per part in EUR",roiTime:"Time savings per month",roiScrap:"Scrap reduction per month",roiTotal:"Total potential per year",roiDisc:"Estimate based on your input. Talk to your TRUMPF advisor for an individual analysis.",testH:"What users say",q1:"It used to take me an hour to find good parameters for a new sheet. Now it's five cuts.",q1a:"— Machine operator, contract manufacturer",q2:"We activated the Cutting Assistant on a Friday. On Monday our trainees were working with it — without instruction.",q2a:"— Production manager",faqH:"Frequently asked questions",faq1q:"Do I need to buy a new machine?",faq1a:"No. The Cutting Assistant is available for all TruLaser machines from 6 kW purchased or retrofitted from May 2025.",faq2q:"Will my material data be transferred?",faq2a:"Your data remains anonymous. TRUMPF receives no information that allows conclusions about your expertise.",faq3q:"How long does setup take?",faq3a:"The Cutting Assistant is rolled out via online update. No installation, no downtime.",faq4q:"Does it work with special material without laser grade?",faq4a:"Yes. That's exactly what the Cutting Assistant was developed for.",ctaH:"Ready to improve your cut edges?"},
+    nw:{h1:"Perfect cut edges. From day one. Without experts.",sub:"The TRUMPF Cutting Assistant uses artificial intelligence to optimize your laser cutting parameters automatically — regardless of material, regardless of how experienced your team is.",cta1:"Request consultation",cta2:"How it works",heroImg:"Hero image: TruLaser machine",t1:"Over 100 years of manufacturing experience",t2:"Global leader in laser technology",t3:"AI innovation since 2025",ctxH:"The challenge in modern manufacturing",ctx1:"Skilled workers are hard to find. Material qualities fluctuate. Tolerance requirements rise.",ctx2:"Whoever buys a laser cutting machine today decides how competitive their operation will be in five years.",ctx3:"The Cutting Assistant is TRUMPF's answer to this reality.",prodImg:"Product image / Screencast",prodH:"The Cutting Assistant — AI in your production",prod1:"Fully integrated into the TruLaser control. No separate hardware, no additional training.",prod2:"Scan, evaluate, apply — a three-step workflow that turns every operator into a parameter expert.",prod3:"After an average of five iterations, the system delivers an optimized cut edge, documented for the next batch.",diffH:"What other machines can't do",d1t:"Objective quality assessment",d1b:"No gut feeling. The scanner measures, the AI evaluates — in micrometers, reproducibly, documented.",d2t:"For every material",d2b:"Non-laser-grade material, special steels, varying batches — the Cutting Assistant adapts parameters to the material, not the other way around.",d3t:"A system that learns",d3b:"Every software update you receive via download makes the system better. No surcharge, no interruption.",cmpH:"What your team does without the Cutting Assistant — and what's possible afterwards",cmpL:"Without Cutting Assistant",cmpR:"With Cutting Assistant",c1l:"Hours of manual parameter search",c1r:"Optimization in a few cut runs",c2l:"Dependence on expert knowledge",c2r:"Every operator can optimize",c3l:"Scrap with special materials",c3r:"Precise parameters for every batch",c4l:"Knowledge lost when staff changes",c4r:"Parameters stay documented in the system",c5l:"Subjective quality assessment",c5r:"Objective measurement in micrometers",eq:'"The Cutting Assistant is a great example of how AI-enabled tools can help overcome problems related to the skilled worker shortage and also saves time and money."',m2:"min. 6 kW power",m3:"Purchase from May 2025",m4:"Updates via download",frmH:"Ready for your first inquiry?",frmSub:"Tell us about your manufacturing. We'll come back with an individual assessment.",matsQ:"Which materials do you mainly cut?",frmCta:"Request consultation"},
+    rs:{h1:"Industrial AI meets fundamental research. What could emerge?",sub:"TRUMPF opens the Cutting Assistant ecosystem to research partners — from data access to joint model development.",cta1:"Request collaboration talk",cta2:"Download technical whitepaper",heroImg:"Heatmap overlay cut edge",t1:"EUR 518.5M R&D budget",t2:"3,006 employees in product development",t3:"Global research partnerships",whyH:"What no lab in the world has — and what we bring",why1:"Real production data from hundreds of manufacturing operations worldwide. Real materials with real batch variations. Real defects, systematically recorded and evaluated.",why2:"This data foundation is what allows industrial AI to grow beyond demonstrators — and it is nowhere else available in this form.",dp1:"Cut edge scan data",dp2:"Parameter pairs",dp3:"Quality metrics in µm",dp4:"Anonymized material classes",dp5:"Optimization trajectories",dp6:"Multi-machine scaling",tierH:"Three paths to collaboration",tFor:"For whom:",tWhat:"What:",tPriv:"Data protection:",tGive:"In return:",tSetup:"Setup:",tier1t:"Data access",tier1who:"Algorithm research, benchmarks, master's theses",tier1what:"Anonymized datasets (scan images, parameter pairs, quality metrics)",tier1priv:"Full anonymization — no inference about operations possible",tier1give:"Acknowledgment in publications, optionally model weights",tier2t:"Weight Sharing / Federated Fine-Tuning",tier2who:"Institutes with GPU cluster, DFG projects, doctorates",tier2what:"Local retraining; exchange of weight deltas only — no raw data",tier2setup:"TRUMPF provides base model and fine-tuning scripts; partner sends deltas; TRUMPF aggregates and validates",tier2give:"Co-authorship, optionally licensing fees",tier3t:"On-Premise Deployment + Code Collaboration",tier3who:"Fraunhofer institutes, strategic partners, industrial research",tier3what:"Exportable model architecture (inference + fine-tuning head); joint module development",tier3setup:"TRUMPF retains IP on base model; co-developed extensions under negotiated IP regime",tier3give:"Co-development contract; access to test machines at TRUMPF",openH:"Where we seek answers — and invite partners",o1t:"Generalizable cut edge model",o1b:"Few-shot learning and domain adaptation for new material classes.",o2t:"Uncertainty quantification",o2b:"Confidence-based decision support in industrial AI systems.",o3t:"Physics-informed AI",o3b:"Combining FEM simulation and field data for physically consistent models.",o4t:"Explainability (XAI)",o4b:"Which features in cut-edge scans drive the parameter recommendation?",o5t:"Human-AI interaction",o5b:"How do manufacturing workers accept AI recommendations, when do they override the system?",o6t:"Standardization and certification",o6b:"Requirements for AI process optimization in aerospace, medical, automotive.",visH:"The Cutting Assistant is the beginning.",vis1:"We are building a benchmark dataset for laser parameters — comparable to what ImageNet did for image recognition.",vis2:"We are developing a federated learning network across hundreds of machines worldwide, without raw data ever leaving our ecosystem.",vis3:"And we are working on a certification framework for AI in manufacturing — together with standards bodies, not parallel to them.",crH:"Who can become a partner?",cr1:"Active expertise in computer vision, machine learning, manufacturing technology or materials science.",cr2:"Clear scientific goals — no contract research without epistemic contribution.",cr3:"Willingness to share results fairly — in publications, models, data.",cr4:"Commitment to data and IP agreements.",crNote:"We review every inquiry individually. Scientific potential and strategic fit decide — not the size of the institution.",frmH:"Let's talk.",inst:"Institution",pos:"Position",field:"Field",f3:"Manufacturing technology",f4:"Materials science",f5:"Human-machine interaction",f6:"Standards / Law / Ethics",phoneOpt:"Phone (optional)",interest:"Research interest",collab:"Collaboration model",cb1:"Data access",cb2:"Weight sharing",cb3:"On-premise deployment",cb4:"Still open",funded:"Funded project available",r1:"Yes",r2:"No",r3:"In planning",frmCta:"Send collaboration inquiry",frmNote:"Your inquiry will be reviewed within five business days. All information is treated confidentially."}
+  },
+  es:{
+    nav:{existing:"Clientes actuales",new:"Nuevos clientes",research:"Investigación",openChat:"Abrir chatbot"},
+    form:{success:"Gracias. Le responderemos en un plazo de 2 días laborables.",name:"Nombre",company:"Empresa",machine:"Número de máquina",email:"Correo electrónico",phone:"Teléfono",message:"Mensaje",submit:"Enviar",privacy:"Política de privacidad",first:"Nombre",last:"Apellido",industry:"Sector",country:"País",employees:"Número de empleados",indOpt1:"Fabricación por contrato",indOpt2:"Ingeniería mecánica",indOpt4:"Tecnología médica",indOpt5:"Otros"},
+    chat:{title:"Cutting Assistant — Pregúntame lo que quieras",placeholder:"Haz una pregunta...",send:"Enviar",error:"Lo sentimos, hubo un problema técnico. Inténtelo de nuevo.",welcome:"¡Hola! Respondo preguntas sobre el TRUMPF Cutting Assistant."},
+    ex:{h1:"Su máquina conoce el material. Ahora aprende a manejarlo.",sub:"El Cutting Assistant optimiza sus parámetros de corte automáticamente, directamente en su TruLaser existente desde 6 kW.",cta1:"Activar ahora",cta2:"Ver demo",heroImg:"Imagen principal: Escáner en acción",problemH:"¿Le resulta familiar?",p1t:"Cantos deficientes en material especial",p1b:"Su material de referencia funciona perfectamente. Pero en cuanto llega un nuevo lote o un cliente pide un material especial, comienza la búsqueda manual de los parámetros adecuados, desde cero.",p2t:"Horas buscando parámetros",p2b:"Un operario experimentado pasa horas ajustando parámetros uno por uno. Tiempo que falta en la producción.",p3t:"El conocimiento se pierde",p3b:"Cuando el operario experimentado está enfermo o deja la empresa, el conocimiento de parámetros se va. El siguiente empieza desde cero.",howH:"Cómo funciona el Cutting Assistant",s1t:"Escanear",s1b:"Capture el canto con el escáner manual. Lleva segundos.",s2t:"Evaluar",s2b:"La IA analiza la rugosidad y altura de rebaba en micrómetros. Objetivo y reproducible.",s3t:"Aplicar la optimización",s3b:"El Cutting Assistant propone nuevos parámetros. Usted confirma. La máquina corta de nuevo.",s4t:"Listo",s4b:"Tras aprox. 5 iteraciones: canto perfecto, parámetros documentados, sin consumir conocimiento experto.",specH:"Lo que el Cutting Assistant puede hacer hoy",tCol1:"Modo",tCol2:"Material",tCol3:"Espesor",tCol4:"Estado",tR1c1:"Modo IA",tR1c2:"Acero al carbono con nitrógeno",tR2c1:"Modo banda ancha",tR3c2:"Acero inoxidable con nitrógeno",tR4c3:"desde marzo 2026",avail:"Disponible",soon:"Próximamente",retrofit:"¿Tiene una máquina más antigua? Hable con su contacto TRUMPF sobre las opciones de retrofit disponibles.",pill2:"mín. 6 kW",pill3:"Compra desde mayo 2025",pill4:"Actualización online",roiH:"¿Cuánto ahorra realmente?",roi1:"Horas/semana buscando parámetros",roi2:"Costes de producción EUR/hora",roi3:"Piezas defectuosas por semana",roi4:"Valor de material por pieza en EUR",roiTime:"Ahorro de tiempo al mes",roiScrap:"Reducción de desechos al mes",roiTotal:"Potencial total anual",roiDisc:"Estimación basada en sus datos. Hable con su asesor TRUMPF para un análisis individual.",testH:"Lo que dicen los usuarios",q1:"Antes tardaba una hora en encontrar buenos parámetros para una nueva chapa. Ahora son cinco cortes.",q1a:"— Operador de máquina, fabricante por contrato",q2:"Activamos el Cutting Assistant un viernes. El lunes nuestros aprendices ya trabajaban con él, sin instrucción.",q2a:"— Director de producción",faqH:"Preguntas frecuentes",faq1q:"¿Tengo que comprar una máquina nueva?",faq1a:"No. El Cutting Assistant está disponible para todas las TruLaser desde 6 kW compradas o adaptadas desde mayo de 2025.",faq2q:"¿Se transfieren mis datos de material?",faq2a:"Sus datos permanecen anónimos. TRUMPF no recibe información que permita deducir su experiencia.",faq3q:"¿Cuánto dura la instalación?",faq3a:"El Cutting Assistant se instala mediante actualización online. Sin montaje, sin paradas.",faq4q:"¿Funciona con material especial sin grado láser?",faq4a:"Sí. Para eso se desarrolló exactamente el Cutting Assistant.",ctaH:"¿Listo para mejorar sus cantos?"},
+    nw:{h1:"Cantos perfectos. Desde el primer día. Sin expertos.",sub:"El TRUMPF Cutting Assistant usa inteligencia artificial para optimizar automáticamente sus parámetros de corte láser, sin importar el material ni la experiencia de su equipo.",cta1:"Solicitar asesoramiento",cta2:"Cómo funciona",heroImg:"Imagen principal: máquina TruLaser",t1:"Más de 100 años de experiencia en fabricación",t2:"Líder mundial en tecnología láser",t3:"Innovación en IA desde 2025",ctxH:"El reto en la fabricación moderna",ctx1:"Los profesionales cualificados son difíciles de encontrar. La calidad de los materiales varía. Las exigencias de tolerancia aumentan.",ctx2:"Quien compra hoy una máquina de corte láser decide cuán competitiva será su empresa en cinco años.",ctx3:"El Cutting Assistant es la respuesta de TRUMPF a esta realidad.",prodImg:"Imagen del producto / Screencast",prodH:"El Cutting Assistant — IA en su producción",prod1:"Totalmente integrado en el control TruLaser. Sin hardware adicional, sin formación extra.",prod2:"Escanear, evaluar, aplicar: un flujo de tres pasos que convierte a cada operador en experto en parámetros.",prod3:"Tras una media de cinco iteraciones, el sistema entrega un canto optimizado, documentado para el siguiente lote.",diffH:"Lo que otras máquinas no pueden hacer",d1t:"Evaluación objetiva de calidad",d1b:"Sin intuición. El escáner mide, la IA evalúa — en micrómetros, reproducible, documentado.",d2t:"Para cada material",d2b:"Material sin grado láser, aceros especiales, lotes variables — el Cutting Assistant adapta los parámetros al material, no al revés.",d3t:"Un sistema que aprende",d3b:"Cada actualización de software que recibe mejora el sistema. Sin coste extra, sin interrupciones.",cmpH:"Lo que hace su equipo sin el Cutting Assistant — y lo que es posible después",cmpL:"Sin Cutting Assistant",cmpR:"Con Cutting Assistant",c1l:"Horas de búsqueda manual de parámetros",c1r:"Optimización en pocas pasadas de corte",c2l:"Dependencia del conocimiento experto",c2r:"Cualquier operador puede optimizar",c3l:"Desechos con materiales especiales",c3r:"Parámetros precisos para cada lote",c4l:"El conocimiento se pierde con los cambios de personal",c4r:"Los parámetros quedan documentados en el sistema",c5l:"Evaluación subjetiva de calidad",c5r:"Medición objetiva en micrómetros",eq:'"The Cutting Assistant is a great example of how AI-enabled tools can help overcome problems related to the skilled worker shortage and also saves time and money."',m2:"mín. 6 kW de potencia",m3:"Compra desde mayo 2025",m4:"Actualizaciones por descarga",frmH:"¿Listo para su primera consulta?",frmSub:"Cuéntenos sobre su fabricación. Le contactaremos con una evaluación individual.",matsQ:"¿Qué materiales corta principalmente?",frmCta:"Solicitar asesoramiento"},
+    rs:{h1:"La IA industrial se encuentra con la investigación fundamental. ¿Qué podría surgir?",sub:"TRUMPF abre el ecosistema del Cutting Assistant a socios de investigación — desde el acceso a datos hasta el desarrollo conjunto de modelos.",cta1:"Solicitar conversación de cooperación",cta2:"Descargar whitepaper técnico",heroImg:"Mapa de calor del canto",t1:"518,5M EUR de presupuesto I+D",t2:"3.006 empleados en desarrollo de producto",t3:"Asociaciones de investigación globales",whyH:"Lo que ningún laboratorio del mundo tiene — y lo que aportamos",why1:"Datos reales de producción de cientos de empresas en todo el mundo. Materiales reales con variaciones reales de lote. Defectos reales, registrados y evaluados sistemáticamente.",why2:"Esta base de datos es lo que permite que la IA industrial crezca más allá de los demostradores — y no está disponible en esta forma en ningún otro sitio.",dp1:"Datos de escaneo de cantos",dp2:"Pares de parámetros",dp3:"Métricas de calidad en µm",dp4:"Clases de material anonimizadas",dp5:"Trayectorias de optimización",dp6:"Escalado multi-máquina",tierH:"Tres vías de colaboración",tFor:"Para quién:",tWhat:"Qué:",tPriv:"Protección de datos:",tGive:"A cambio:",tSetup:"Setup:",tier1t:"Acceso a datos",tier1who:"Investigación algorítmica, benchmarks, tesis de máster",tier1what:"Conjuntos de datos anonimizados (imágenes de escaneo, pares de parámetros, métricas de calidad)",tier1priv:"Anonimización completa — sin inferencias sobre la operación",tier1give:"Reconocimiento en publicaciones, opcionalmente pesos del modelo",tier2t:"Weight Sharing / Fine-tuning federado",tier2who:"Institutos con clúster GPU, proyectos DFG, doctorados",tier2what:"Reentrenamiento local; intercambio sólo de deltas de pesos — sin datos brutos",tier2setup:"TRUMPF aporta modelo base y scripts de fine-tuning; el socio envía deltas; TRUMPF agrega y valida",tier2give:"Coautoría, opcionalmente regalías",tier3t:"Despliegue on-premise + colaboración de código",tier3who:"Institutos Fraunhofer, socios estratégicos, investigación industrial",tier3what:"Arquitectura de modelo exportable (cabeza de inferencia + fine-tuning); desarrollo conjunto de módulos",tier3setup:"TRUMPF conserva la IP del modelo base; extensiones codesarrolladas bajo régimen de IP negociado",tier3give:"Contrato de codesarrollo; acceso a máquinas de prueba en TRUMPF",openH:"Dónde buscamos respuestas — e invitamos a socios",o1t:"Modelo generalizable de canto",o1b:"Few-shot learning y adaptación de dominio para nuevas clases de material.",o2t:"Cuantificación de incertidumbre",o2b:"Soporte a la decisión basado en confianza en sistemas de IA industrial.",o3t:"IA informada por física",o3b:"Combinar simulación FEM y datos de campo para modelos físicamente consistentes.",o4t:"Explicabilidad (XAI)",o4b:"¿Qué rasgos en los escaneos de cantos impulsan la recomendación de parámetros?",o5t:"Interacción humano-IA",o5b:"¿Cómo aceptan los operadores las recomendaciones de la IA, cuándo invalidan el sistema?",o6t:"Normalización y certificación",o6b:"Requisitos para la optimización de procesos con IA en aeronáutica, medicina, automoción.",visH:"El Cutting Assistant es solo el principio.",vis1:"Estamos construyendo un conjunto de datos de referencia para parámetros láser — comparable a lo que ImageNet hizo para el reconocimiento de imágenes.",vis2:"Estamos desarrollando una red de aprendizaje federado en cientos de máquinas en todo el mundo, sin que ningún dato bruto salga de nuestro ecosistema.",vis3:"Y trabajamos en un marco de certificación para la IA en fabricación — junto con los organismos de normalización, no en paralelo a ellos.",crH:"¿Quién puede ser socio?",cr1:"Experiencia activa en visión por ordenador, aprendizaje automático, técnica de fabricación o ciencia de materiales.",cr2:"Objetivos científicos claros — nada de investigación por encargo sin contribución epistémica.",cr3:"Disposición a compartir resultados de forma justa — en publicaciones, modelos, datos.",cr4:"Compromiso con los acuerdos de datos e IP.",crNote:"Examinamos cada solicitud individualmente. El potencial científico y la idoneidad estratégica deciden — no el tamaño de la institución.",frmH:"Hablemos.",inst:"Institución",pos:"Cargo",field:"Especialidad",f3:"Técnica de fabricación",f4:"Ciencia de materiales",f5:"Interacción humano-máquina",f6:"Normas / Derecho / Ética",phoneOpt:"Teléfono (opcional)",interest:"Interés de investigación",collab:"Modelo de colaboración",cb1:"Acceso a datos",cb2:"Weight sharing",cb3:"Despliegue on-premise",cb4:"Aún abierto",funded:"Proyecto con fondos externos",r1:"Sí",r2:"No",r3:"En planificación",frmCta:"Enviar solicitud de cooperación",frmNote:"Su solicitud será revisada en un plazo de cinco días laborables. Toda la información se trata de forma confidencial."}
+  },
+  nl:{
+    nav:{existing:"Bestaande klanten",new:"Nieuwe klanten",research:"Onderzoek",openChat:"Chatbot openen"},
+    form:{success:"Bedankt. We nemen binnen 2 werkdagen contact op.",name:"Naam",company:"Bedrijf",machine:"Machinenummer",email:"E-mail",phone:"Telefoon",message:"Bericht",submit:"Versturen",privacy:"Privacyverklaring",first:"Voornaam",last:"Achternaam",industry:"Branche",country:"Land",employees:"Aantal medewerkers",indOpt1:"Loonfabricage",indOpt2:"Machinebouw",indOpt4:"Medische techniek",indOpt5:"Overig"},
+    chat:{title:"Cutting Assistant — Vraag me alles",placeholder:"Stel een vraag...",send:"Verzenden",error:"Sorry, er was een technisch probleem. Probeer het opnieuw.",welcome:"Hallo! Ik beantwoord vragen over de TRUMPF Cutting Assistant."},
+    ex:{h1:"Uw machine kent het materiaal. Nu leert ze ermee om te gaan.",sub:"De Cutting Assistant optimaliseert uw snijparameters automatisch — direct op uw bestaande TruLaser vanaf 6 kW.",cta1:"Nu activeren",cta2:"Demo bekijken",heroImg:"Hero-afbeelding: Scanner in actie",problemH:"Herkent u dit?",p1t:"Slechte kanten bij speciale materialen",p1b:"Uw referentiemateriaal werkt prima. Maar zodra een nieuwe partij komt of een klant een speciaal materiaal bestelt, begint de handmatige zoektocht naar de juiste parameters — opnieuw.",p2t:"Urenlang parameters zoeken",p2b:"Een ervaren medewerker spendeert uren aan het bijstellen van parameters. Tijd die in de productie ontbreekt.",p3t:"Kennis gaat verloren",p3b:"Wanneer de ervaren operator ziek is of het bedrijf verlaat, is de parameterkennis weg. De volgende begint opnieuw.",howH:"Zo werkt de Cutting Assistant",s1t:"Scannen",s1b:"Snijkant vastleggen met de handscanner. Dat duurt seconden.",s2t:"Laten beoordelen",s2b:"De AI analyseert ruwheid en braamhoogte in micrometers. Objectief en reproduceerbaar.",s3t:"Optimalisatie toepassen",s3b:"De Cutting Assistant stelt nieuwe parameters voor. U bevestigt. De machine snijdt opnieuw.",s4t:"Klaar",s4b:"Na ca. 5 iteraties: perfecte snijkant, gedocumenteerde parameters, geen expertkennis verbruikt.",specH:"Wat de Cutting Assistant vandaag kan",tCol1:"Modus",tCol2:"Materiaal",tCol3:"Dikte",tCol4:"Status",tR1c1:"AI-modus",tR1c2:"Constructiestaal stikstof",tR2c1:"Bandbreedte-modus",tR3c2:"RVS stikstof",tR4c3:"vanaf maart 2026",avail:"Beschikbaar",soon:"Coming soon",retrofit:"Heeft u een oudere machine? Praat met uw TRUMPF-contactpersoon over beschikbare retrofit-opties.",pill2:"min. 6 kW",pill3:"Aankoop vanaf mei 2025",pill4:"Online-update",roiH:"Wat bespaart u concreet?",roi1:"Uren/week aan parameters zoeken",roi2:"Productiekosten EUR/uur",roi3:"Afgekeurde stukken per week",roi4:"Materiaalwaarde per stuk in EUR",roiTime:"Tijdsbesparing per maand",roiScrap:"Afvalreductie per maand",roiTotal:"Totaal potentieel per jaar",roiDisc:"Schatting op basis van uw gegevens. Praat met uw TRUMPF-adviseur voor een individuele analyse.",testH:"Wat gebruikers zeggen",q1:"Vroeger had ik een uur nodig om goede parameters voor een nieuwe plaat te vinden. Nu zijn het vijf sneden.",q1a:"— Machinebediener, loonfabrikant",q2:"We hebben de Cutting Assistant op vrijdag geactiveerd. Maandag werkten onze leerlingen ermee — zonder instructie.",q2a:"— Productieleider",faqH:"Veelgestelde vragen",faq1q:"Moet ik mijn machine vervangen?",faq1a:"Nee. De Cutting Assistant is beschikbaar voor alle TruLaser vanaf 6 kW die vanaf mei 2025 zijn gekocht of geretrofit.",faq2q:"Worden mijn materiaalgegevens overgedragen?",faq2a:"Uw gegevens blijven anoniem. TRUMPF ontvangt geen informatie waaruit conclusies over uw expertise getrokken kunnen worden.",faq3q:"Hoe lang duurt de installatie?",faq3a:"De Cutting Assistant wordt via online-update geïnstalleerd. Geen montage, geen stilstand.",faq4q:"Werkt het met speciaal materiaal zonder laserkwaliteit?",faq4a:"Ja. Precies daarvoor is de Cutting Assistant ontwikkeld.",ctaH:"Klaar om uw snijkanten te verbeteren?"},
+    nw:{h1:"Perfecte snijkanten. Vanaf dag één. Zonder experts.",sub:"De TRUMPF Cutting Assistant gebruikt kunstmatige intelligentie om uw laserparameters automatisch te optimaliseren — ongeacht het materiaal, ongeacht hoe ervaren uw team is.",cta1:"Advies aanvragen",cta2:"Hoe het werkt",heroImg:"Hero-afbeelding: TruLaser machine",t1:"Meer dan 100 jaar productie-ervaring",t2:"Wereldmarktleider lasertechnologie",t3:"AI-innovatie sinds 2025",ctxH:"De uitdaging in moderne productie",ctx1:"Vakkrachten zijn moeilijk te vinden. Materiaalkwaliteit fluctueert. Toleranties worden strenger.",ctx2:"Wie vandaag een lasersnijmachine koopt, beslist hoe concurrerend zijn bedrijf over vijf jaar is.",ctx3:"De Cutting Assistant is TRUMPF's antwoord op deze realiteit.",prodImg:"Productafbeelding / Screencast",prodH:"De Cutting Assistant — AI in uw productie",prod1:"Volledig geïntegreerd in de TruLaser-besturing. Geen aparte hardware, geen extra training.",prod2:"Scannen, beoordelen, toepassen — een driestappenproces dat elke operator tot parameterexpert maakt.",prod3:"Na gemiddeld vijf iteraties levert het systeem een geoptimaliseerde snijkant, gedocumenteerd voor de volgende partij.",diffH:"Wat andere machines niet kunnen",d1t:"Objectieve kwaliteitsbeoordeling",d1b:"Geen onderbuikgevoel. De scanner meet, de AI beoordeelt — in micrometers, reproduceerbaar, gedocumenteerd.",d2t:"Voor elk materiaal",d2b:"Niet-laserkwaliteitsmateriaal, speciale staalsoorten, wisselende partijen — de Cutting Assistant past de parameters aan het materiaal aan, niet andersom.",d3t:"Een systeem dat leert",d3b:"Elke software-update die u via download ontvangt, maakt het systeem beter. Zonder meerprijs, zonder onderbreking.",cmpH:"Wat uw team doet zonder de Cutting Assistant — en wat daarna mogelijk is",cmpL:"Zonder Cutting Assistant",cmpR:"Met Cutting Assistant",c1l:"Urenlang handmatig parameters zoeken",c1r:"Optimalisatie in enkele snijgangen",c2l:"Afhankelijk van expertkennis",c2r:"Elke operator kan optimaliseren",c3l:"Uitval bij speciale materialen",c3r:"Precieze parameters voor elke partij",c4l:"Kennis gaat verloren bij personeelswissels",c4r:"Parameters blijven gedocumenteerd in het systeem",c5l:"Subjectieve kwaliteitsbeoordeling",c5r:"Objectieve meting in micrometers",eq:'"The Cutting Assistant is a great example of how AI-enabled tools can help overcome problems related to the skilled worker shortage and also saves time and money."',m2:"min. 6 kW vermogen",m3:"Aankoop vanaf mei 2025",m4:"Updates via download",frmH:"Klaar voor uw eerste aanvraag?",frmSub:"Vertel ons over uw productie. We komen terug met een individuele inschatting.",matsQ:"Welke materialen snijdt u voornamelijk?",frmCta:"Adviesgesprek aanvragen"},
+    rs:{h1:"Industriële AI ontmoet fundamenteel onderzoek. Wat zou kunnen ontstaan?",sub:"TRUMPF opent het ecosysteem van de Cutting Assistant voor onderzoekspartners — van datatoegang tot gezamenlijke modelontwikkeling.",cta1:"Gesprek over samenwerking aanvragen",cta2:"Technische whitepaper downloaden",heroImg:"Heatmap-overlay snijkant",t1:"518,5 mln EUR R&D-budget",t2:"3.006 medewerkers in productontwikkeling",t3:"Wereldwijde onderzoekspartnerschappen",whyH:"Wat geen lab ter wereld heeft — en wat wij inbrengen",why1:"Echte productiedata uit honderden productiebedrijven wereldwijd. Echte materialen met echte partijvariaties. Echte fouten, systematisch vastgelegd en beoordeeld.",why2:"Deze databasis is de fundering waarop industriële AI verder groeit dan demonstrators — en is in deze vorm nergens anders beschikbaar.",dp1:"Snijkantscandata",dp2:"Parameterparen",dp3:"Kwaliteitsmetrieken in µm",dp4:"Geanonimiseerde materiaalklassen",dp5:"Optimalisatieverlopen",dp6:"Multi-machine schaling",tierH:"Drie wegen tot samenwerking",tFor:"Voor wie:",tWhat:"Wat:",tPriv:"Gegevensbescherming:",tGive:"Wederdienst:",tSetup:"Setup:",tier1t:"Datatoegang",tier1who:"Algoritmeonderzoek, benchmarks, masterscripties",tier1what:"Geanonimiseerde datasets (scanbeelden, parameterparen, kwaliteitsmetrieken)",tier1priv:"Volledige anonimisering — geen conclusies over bedrijven mogelijk",tier1give:"Vermelding in publicaties, optioneel modelgewichten",tier2t:"Weight Sharing / Federated Fine-Tuning",tier2who:"Instituten met GPU-cluster, DFG-projecten, promoties",tier2what:"Lokale hertraining; alleen uitwisseling van gewichts-deltas — geen ruwe data",tier2setup:"TRUMPF levert basismodel en fine-tuning-scripts; partner stuurt deltas; TRUMPF aggregeert en valideert",tier2give:"Co-auteurschap, optioneel licentievergoedingen",tier3t:"On-premise deployment + code-samenwerking",tier3who:"Fraunhofer-instituten, strategische partners, industrieel onderzoek",tier3what:"Exporteerbare modelarchitectuur (inferentie + fine-tuning-head); gezamenlijke moduleontwikkeling",tier3setup:"TRUMPF behoudt IP op basismodel; co-ontwikkelde uitbreidingen onder onderhandeld IP-regime",tier3give:"Co-ontwikkelingscontract; toegang tot testmachines bij TRUMPF",openH:"Waar wij antwoorden zoeken — en partners uitnodigen",o1t:"Generaliseerbaar snijkantmodel",o1b:"Few-shot learning en domeinadaptatie voor nieuwe materiaalklassen.",o2t:"Onzekerheidskwantificering",o2b:"Vertrouwensgebaseerde beslissingsondersteuning in industriële AI-systemen.",o3t:"Fysica-geïnformeerde AI",o3b:"FEM-simulatie en velddata combineren voor fysisch consistente modellen.",o4t:"Verklaarbaarheid (XAI)",o4b:"Welke kenmerken in snijkantscans drijven de parameteraanbeveling?",o5t:"Mens-AI-interactie",o5b:"Hoe accepteren productiemedewerkers AI-aanbevelingen, wanneer overrulen ze het systeem?",o6t:"Normering en certificering",o6b:"Eisen aan AI-procesoptimalisatie in lucht- en ruimtevaart, medisch, automotive.",visH:"De Cutting Assistant is het begin.",vis1:"Wij bouwen een benchmark-dataset voor laserparameters — vergelijkbaar met wat ImageNet voor beeldherkenning deed.",vis2:"Wij ontwikkelen een gefedereerd leernetwerk over honderden machines wereldwijd, zonder dat ruwe data ooit ons ecosysteem verlaat.",vis3:"En we werken aan een certificeringsraamwerk voor AI in productie — samen met normeringsinstanties, niet parallel ernaast.",crH:"Wie kan partner worden?",cr1:"Actieve expertise in computer vision, machine learning, productietechniek of materiaalwetenschap.",cr2:"Heldere wetenschappelijke doelen — geen contractonderzoek zonder kennisbijdrage.",cr3:"Bereidheid resultaten eerlijk te delen — in publicaties, modellen, data.",cr4:"Verbintenis aan data- en IP-afspraken.",crNote:"Wij beoordelen elke aanvraag individueel. Wetenschappelijk potentieel en strategische fit beslissen — niet de grootte van de instelling.",frmH:"Laten we praten.",inst:"Instituut",pos:"Functie",field:"Vakgebied",f3:"Productietechniek",f4:"Materiaalwetenschap",f5:"Mens-machine-interactie",f6:"Normering / Recht / Ethiek",phoneOpt:"Telefoon (optioneel)",interest:"Onderzoeksinteresse",collab:"Samenwerkingsmodel",cb1:"Datatoegang",cb2:"Weight sharing",cb3:"On-premise deployment",cb4:"Nog open",funded:"Project met externe financiering",r1:"Ja",r2:"Nee",r3:"In planning",frmCta:"Samenwerkingsaanvraag versturen",frmNote:"Uw aanvraag wordt binnen vijf werkdagen beoordeeld. Alle informatie wordt vertrouwelijk behandeld."}
+  },
+  it:{
+    nav:{existing:"Clienti esistenti",new:"Nuovi clienti",research:"Ricerca",openChat:"Apri chatbot"},
+    form:{success:"Grazie. Le risponderemo entro 2 giorni lavorativi.",name:"Nome",company:"Azienda",machine:"Numero macchina",email:"E-mail",phone:"Telefono",message:"Messaggio",submit:"Invia",privacy:"Informativa sulla privacy",first:"Nome",last:"Cognome",industry:"Settore",country:"Paese",employees:"Numero di dipendenti",indOpt1:"Produzione conto terzi",indOpt2:"Ingegneria meccanica",indOpt4:"Tecnologia medica",indOpt5:"Altro"},
+    chat:{title:"Cutting Assistant — Chiedimi qualsiasi cosa",placeholder:"Fai una domanda...",send:"Invia",error:"Spiacenti, c'è stato un problema tecnico. Riprovi.",welcome:"Salve! Rispondo a domande sul TRUMPF Cutting Assistant."},
+    ex:{h1:"La sua macchina conosce il materiale. Ora impara a gestirlo.",sub:"Il Cutting Assistant ottimizza automaticamente i suoi parametri di taglio — direttamente sulla sua TruLaser esistente da 6 kW in su.",cta1:"Attiva ora",cta2:"Guarda la demo",heroImg:"Immagine hero: Scanner in azione",problemH:"Le suona familiare?",p1t:"Bordi scadenti su materiali speciali",p1b:"Il suo materiale di riferimento funziona perfettamente. Ma appena arriva un nuovo lotto o un cliente ordina un materiale speciale, inizia la ricerca manuale dei parametri giusti — da capo.",p2t:"Ore di ricerca parametri",p2b:"Un operatore esperto passa ore a regolare parametri uno per uno. Tempo che manca alla produzione.",p3t:"La conoscenza va persa",p3b:"Quando l'operatore esperto è malato o lascia l'azienda, la conoscenza dei parametri è persa. Il successivo riparte da zero.",howH:"Come funziona il Cutting Assistant",s1t:"Scansiona",s1b:"Acquisire il bordo di taglio con lo scanner manuale. Bastano secondi.",s2t:"Far valutare",s2b:"L'IA analizza rugosità e altezza bave in micrometri. Oggettivo e riproducibile.",s3t:"Applica l'ottimizzazione",s3b:"Il Cutting Assistant propone nuovi parametri. Lei conferma. La macchina taglia di nuovo.",s4t:"Fatto",s4b:"Dopo circa 5 iterazioni: bordo perfetto, parametri documentati, nessuna conoscenza esperta consumata.",specH:"Cosa può fare oggi il Cutting Assistant",tCol1:"Modalità",tCol2:"Materiale",tCol3:"Spessore",tCol4:"Stato",tR1c1:"Modalità IA",tR1c2:"Acciaio dolce azoto",tR2c1:"Modalità a banda larga",tR3c2:"Acciaio inossidabile azoto",tR4c3:"da marzo 2026",avail:"Disponibile",soon:"In arrivo",retrofit:"Ha una macchina più vecchia? Parli con il suo referente TRUMPF delle opzioni retrofit disponibili.",pill2:"min. 6 kW",pill3:"Acquisto da maggio 2025",pill4:"Aggiornamento online",roiH:"Quanto risparmia concretamente?",roi1:"Ore/settimana per cercare parametri",roi2:"Costi di produzione EUR/ora",roi3:"Pezzi di scarto a settimana",roi4:"Valore materiale per pezzo in EUR",roiTime:"Risparmio di tempo al mese",roiScrap:"Riduzione scarti al mese",roiTotal:"Potenziale totale annuo",roiDisc:"Stima basata sui suoi dati. Parli con il suo consulente TRUMPF per un'analisi individuale.",testH:"Cosa dicono gli utenti",q1:"Prima impiegavo un'ora per trovare buoni parametri per una nuova lamiera. Ora sono cinque tagli.",q1a:"— Operatore macchina, terzista",q2:"Abbiamo attivato il Cutting Assistant un venerdì. Lunedì i nostri apprendisti ci lavoravano — senza istruzioni.",q2a:"— Responsabile produzione",faqH:"Domande frequenti",faq1q:"Devo acquistare una nuova macchina?",faq1a:"No. Il Cutting Assistant è disponibile per tutte le TruLaser da 6 kW acquistate o adattate da maggio 2025.",faq2q:"I miei dati materiali vengono trasmessi?",faq2a:"I suoi dati restano anonimi. TRUMPF non riceve informazioni che permettano deduzioni sulla sua expertise.",faq3q:"Quanto dura l'installazione?",faq3a:"Il Cutting Assistant viene installato via aggiornamento online. Nessun montaggio, nessun fermo.",faq4q:"Funziona con materiale speciale senza qualità laser?",faq4a:"Sì. Proprio per questo è stato sviluppato il Cutting Assistant.",ctaH:"Pronto a migliorare i suoi bordi di taglio?"},
+    nw:{h1:"Bordi di taglio perfetti. Dal primo giorno. Senza esperti.",sub:"Il TRUMPF Cutting Assistant usa l'intelligenza artificiale per ottimizzare automaticamente i parametri di taglio laser — indipendentemente dal materiale o dall'esperienza del team.",cta1:"Richiedi consulenza",cta2:"Come funziona",heroImg:"Immagine hero: macchina TruLaser",t1:"Oltre 100 anni di esperienza produttiva",t2:"Leader mondiale nella tecnologia laser",t3:"Innovazione IA dal 2025",ctxH:"La sfida nella produzione moderna",ctx1:"I tecnici qualificati sono difficili da trovare. La qualità dei materiali varia. I requisiti di tolleranza aumentano.",ctx2:"Chi acquista oggi una macchina di taglio laser decide quanto competitiva sarà la sua azienda fra cinque anni.",ctx3:"Il Cutting Assistant è la risposta TRUMPF a questa realtà.",prodImg:"Immagine prodotto / Screencast",prodH:"Il Cutting Assistant — IA nella sua produzione",prod1:"Completamente integrato nel controllo TruLaser. Nessun hardware separato, nessuna formazione aggiuntiva.",prod2:"Scansionare, valutare, applicare — un flusso in tre fasi che trasforma ogni operatore in esperto di parametri.",prod3:"Dopo una media di cinque iterazioni il sistema fornisce un bordo ottimizzato, documentato per il prossimo lotto.",diffH:"Cosa non sanno fare le altre macchine",d1t:"Valutazione oggettiva della qualità",d1b:"Niente intuito. Lo scanner misura, l'IA valuta — in micrometri, riproducibile, documentato.",d2t:"Per ogni materiale",d2b:"Materiale non qualità laser, acciai speciali, lotti variabili — il Cutting Assistant adatta i parametri al materiale, non viceversa.",d3t:"Un sistema che impara",d3b:"Ogni aggiornamento software che riceve tramite download rende il sistema migliore. Senza sovrapprezzo, senza interruzioni.",cmpH:"Cosa fa il suo team senza Cutting Assistant — e cosa è possibile dopo",cmpL:"Senza Cutting Assistant",cmpR:"Con Cutting Assistant",c1l:"Ore di ricerca manuale dei parametri",c1r:"Ottimizzazione in pochi passaggi di taglio",c2l:"Dipendenza dalla conoscenza esperta",c2r:"Ogni operatore può ottimizzare",c3l:"Scarti su materiali speciali",c3r:"Parametri precisi per ogni lotto",c4l:"La conoscenza si perde con il turnover",c4r:"I parametri restano documentati nel sistema",c5l:"Valutazione soggettiva della qualità",c5r:"Misurazione oggettiva in micrometri",eq:'"The Cutting Assistant is a great example of how AI-enabled tools can help overcome problems related to the skilled worker shortage and also saves time and money."',m2:"min. 6 kW di potenza",m3:"Acquisto da maggio 2025",m4:"Aggiornamenti via download",frmH:"Pronto per la sua prima richiesta?",frmSub:"Ci racconti della sua produzione. Le risponderemo con una valutazione individuale.",matsQ:"Quali materiali taglia principalmente?",frmCta:"Richiedi una consulenza"},
+    rs:{h1:"L'IA industriale incontra la ricerca fondamentale. Cosa potrebbe nascere?",sub:"TRUMPF apre l'ecosistema del Cutting Assistant ai partner di ricerca — dall'accesso ai dati allo sviluppo congiunto di modelli.",cta1:"Richiedi colloquio di cooperazione",cta2:"Scarica whitepaper tecnico",heroImg:"Heatmap del bordo di taglio",t1:"518,5 mln EUR di budget R&S",t2:"3.006 dipendenti nello sviluppo prodotto",t3:"Partnership di ricerca globali",whyH:"Ciò che nessun laboratorio al mondo ha — e che noi portiamo",why1:"Dati di produzione reali da centinaia di aziende manifatturiere nel mondo. Materiali reali con variazioni reali di lotto. Difetti reali, registrati e valutati sistematicamente.",why2:"Questa base dati è ciò che permette all'IA industriale di crescere oltre i demonstrator — e non è disponibile in questa forma da nessun'altra parte.",dp1:"Dati di scansione bordi",dp2:"Coppie di parametri",dp3:"Metriche di qualità in µm",dp4:"Classi di materiale anonimizzate",dp5:"Traiettorie di ottimizzazione",dp6:"Scalabilità multi-macchina",tierH:"Tre vie di collaborazione",tFor:"Per chi:",tWhat:"Cosa:",tPriv:"Protezione dati:",tGive:"In cambio:",tSetup:"Setup:",tier1t:"Accesso ai dati",tier1who:"Ricerca algoritmica, benchmark, tesi magistrali",tier1what:"Dataset anonimizzati (immagini di scansione, coppie di parametri, metriche di qualità)",tier1priv:"Anonimizzazione completa — nessuna inferenza sulle aziende possibile",tier1give:"Ringraziamento nelle pubblicazioni, opzionalmente pesi del modello",tier2t:"Weight Sharing / Fine-tuning federato",tier2who:"Istituti con cluster GPU, progetti DFG, dottorati",tier2what:"Riaddestramento locale; scambio solo dei delta dei pesi — nessun dato grezzo",tier2setup:"TRUMPF fornisce modello base e script di fine-tuning; il partner invia i delta; TRUMPF aggrega e valida",tier2give:"Co-autoraggio, opzionalmente royalty",tier3t:"Deployment on-premise + collaborazione sul codice",tier3who:"Istituti Fraunhofer, partner strategici, ricerca industriale",tier3what:"Architettura del modello esportabile (inferenza + fine-tuning head); sviluppo congiunto di moduli",tier3setup:"TRUMPF mantiene l'IP sul modello base; estensioni co-sviluppate sotto regime IP negoziato",tier3give:"Contratto di co-sviluppo; accesso a macchine di test in TRUMPF",openH:"Dove cerchiamo risposte — e invitiamo partner",o1t:"Modello generalizzabile del bordo di taglio",o1b:"Few-shot learning e adattamento di dominio per nuove classi di materiale.",o2t:"Quantificazione dell'incertezza",o2b:"Supporto decisionale basato su confidenza in sistemi IA industriali.",o3t:"IA informata dalla fisica",o3b:"Combinare simulazione FEM e dati di campo per modelli fisicamente coerenti.",o4t:"Spiegabilità (XAI)",o4b:"Quali caratteristiche nelle scansioni dei bordi guidano la raccomandazione di parametri?",o5t:"Interazione uomo-IA",o5b:"Come gli operatori accettano le raccomandazioni IA, quando scavalcano il sistema?",o6t:"Standardizzazione e certificazione",o6b:"Requisiti per l'ottimizzazione di processo IA in aerospazio, medicale, automotive.",visH:"Il Cutting Assistant è solo l'inizio.",vis1:"Stiamo costruendo un dataset di benchmark per parametri laser — paragonabile a quello che ImageNet ha fatto per il riconoscimento di immagini.",vis2:"Stiamo sviluppando una rete di apprendimento federato su centinaia di macchine nel mondo, senza che dati grezzi lascino mai il nostro ecosistema.",vis3:"E lavoriamo a un quadro di certificazione per l'IA nella produzione — insieme agli enti di normazione, non parallelamente ad essi.",crH:"Chi può diventare partner?",cr1:"Esperienza attiva in computer vision, machine learning, tecnica di produzione o scienza dei materiali.",cr2:"Obiettivi scientifici chiari — niente ricerca a contratto senza contributo conoscitivo.",cr3:"Disponibilità a condividere risultati equamente — in pubblicazioni, modelli, dati.",cr4:"Vincolatività negli accordi su dati e IP.",crNote:"Esaminiamo ogni richiesta individualmente. Decidono il potenziale scientifico e l'idoneità strategica — non la dimensione dell'istituzione.",frmH:"Parliamone.",inst:"Istituzione",pos:"Posizione",field:"Disciplina",f3:"Tecnica di produzione",f4:"Scienza dei materiali",f5:"Interazione uomo-macchina",f6:"Normazione / Diritto / Etica",phoneOpt:"Telefono (opzionale)",interest:"Interesse di ricerca",collab:"Modello di collaborazione",cb1:"Accesso ai dati",cb2:"Weight sharing",cb3:"Deployment on-premise",cb4:"Ancora aperto",funded:"Progetto con fondi terzi disponibile",r1:"Sì",r2:"No",r3:"In pianificazione",frmCta:"Invia richiesta di cooperazione",frmNote:"La sua richiesta sarà valutata entro cinque giorni lavorativi. Tutte le informazioni sono trattate riservatamente."}
+  },
+  sv:{
+    nav:{existing:"Befintliga kunder",new:"Nya kunder",research:"Forskning",openChat:"Öppna chatbot"},
+    form:{success:"Tack. Vi återkommer inom 2 arbetsdagar.",name:"Namn",company:"Företag",machine:"Maskinnummer",email:"E-post",phone:"Telefon",message:"Meddelande",submit:"Skicka",privacy:"Integritetspolicy",first:"Förnamn",last:"Efternamn",industry:"Bransch",country:"Land",employees:"Antal anställda",indOpt1:"Legotillverkning",indOpt2:"Maskinteknik",indOpt4:"Medicinteknik",indOpt5:"Övrigt"},
+    chat:{title:"Cutting Assistant — Fråga mig vad som helst",placeholder:"Ställ en fråga...",send:"Skicka",error:"Förlåt, det uppstod ett tekniskt problem. Försök igen.",welcome:"Hej! Jag svarar på frågor om TRUMPF Cutting Assistant."},
+    ex:{h1:"Din maskin känner materialet. Nu lär den sig att hantera det.",sub:"Cutting Assistant optimerar dina skärparametrar automatiskt — direkt på din befintliga TruLaser från 6 kW.",cta1:"Aktivera nu",cta2:"Se demo",heroImg:"Hero-bild: Scanner i aktion",problemH:"Känns det igen?",p1t:"Dåliga kanter på specialmaterial",p1b:"Ditt referensmaterial fungerar utmärkt. Men så snart en ny batch kommer eller en kund beställer ett specialmaterial börjar den manuella jakten på rätt parametrar — från början.",p2t:"Timmar av parametersökning",p2b:"En erfaren operatör lägger timmar på att justera parametrar en i taget. Tid som saknas i produktionen.",p3t:"Kunskap går förlorad",p3b:"När den erfarna operatören är sjuk eller slutar är parameterkunskapen borta. Nästa börjar om från noll.",howH:"Så fungerar Cutting Assistant",s1t:"Skanna",s1b:"Fånga skärkanten med handscannern. Det tar sekunder.",s2t:"Låt utvärdera",s2b:"AI:n analyserar grovhet och grathöjd i mikrometer. Objektivt och reproducerbart.",s3t:"Tillämpa optimeringen",s3b:"Cutting Assistant föreslår nya parametrar. Du bekräftar. Maskinen skär igen.",s4t:"Klar",s4b:"Efter ca 5 iterationer: perfekt skärkant, dokumenterade parametrar, ingen expertkunskap förbrukad.",specH:"Vad Cutting Assistant kan idag",tCol1:"Läge",tCol2:"Material",tCol3:"Tjocklek",tCol4:"Status",tR1c1:"AI-läge",tR1c2:"Konstruktionsstål kväve",tR2c1:"Bandbreddsläge",tR3c2:"Rostfritt stål kväve",tR4c3:"från mars 2026",avail:"Tillgänglig",soon:"Kommer snart",retrofit:"Har du en äldre maskin? Prata med din TRUMPF-kontakt om tillgängliga retrofit-alternativ.",pill2:"min. 6 kW",pill3:"Köp från maj 2025",pill4:"Online-uppdatering",roiH:"Vad sparar du konkret?",roi1:"Timmar/vecka med parametersökning",roi2:"Produktionskostnader EUR/timme",roi3:"Kassationer per vecka",roi4:"Materialvärde per detalj i EUR",roiTime:"Tidsbesparing per månad",roiScrap:"Kassationsminskning per månad",roiTotal:"Total potential per år",roiDisc:"Uppskattning baserad på dina uppgifter. Prata med din TRUMPF-rådgivare för en individuell analys.",testH:"Vad användarna säger",q1:"Förr tog det mig en timme att hitta bra parametrar för en ny plåt. Nu är det fem snitt.",q1a:"— Maskinoperatör, legotillverkare",q2:"Vi aktiverade Cutting Assistant en fredag. På måndagen jobbade våra lärlingar med den — utan instruktion.",q2a:"— Produktionschef",faqH:"Vanliga frågor",faq1q:"Måste jag köpa en ny maskin?",faq1a:"Nej. Cutting Assistant är tillgänglig för alla TruLaser från 6 kW som köpts eller eftermonterats från maj 2025.",faq2q:"Överförs mina materialdata?",faq2a:"Dina data förblir anonyma. TRUMPF får ingen information som tillåter slutsatser om din expertis.",faq3q:"Hur lång tid tar installationen?",faq3a:"Cutting Assistant rullas ut via online-uppdatering. Ingen montering, inget stillestånd.",faq4q:"Fungerar det med specialmaterial utan laserkvalitet?",faq4a:"Ja. Det är precis vad Cutting Assistant utvecklades för.",ctaH:"Redo att förbättra dina skärkanter?"},
+    nw:{h1:"Perfekta skärkanter. Från dag ett. Utan experter.",sub:"TRUMPF Cutting Assistant använder artificiell intelligens för att automatiskt optimera dina laserskärparametrar — oavsett material, oavsett hur erfaret ditt team är.",cta1:"Begär rådgivning",cta2:"Så fungerar det",heroImg:"Hero-bild: TruLaser-maskin",t1:"Över 100 års tillverkningserfarenhet",t2:"Världsledande inom laserteknologi",t3:"AI-innovation sedan 2025",ctxH:"Utmaningen i modern tillverkning",ctx1:"Yrkesarbetare är svåra att hitta. Materialkvaliteter varierar. Toleranskraven ökar.",ctx2:"Den som köper en laserskärmaskin idag avgör hur konkurrenskraftig verksamheten är om fem år.",ctx3:"Cutting Assistant är TRUMPFs svar på denna verklighet.",prodImg:"Produktbild / Screencast",prodH:"Cutting Assistant — AI i din produktion",prod1:"Fullt integrerad i TruLaser-styrningen. Ingen separat hårdvara, ingen extra utbildning.",prod2:"Skanna, utvärdera, tillämpa — ett tresteg som gör varje operatör till parameterexpert.",prod3:"Efter i genomsnitt fem iterationer levererar systemet en optimerad skärkant, dokumenterad för nästa batch.",diffH:"Vad andra maskiner inte kan",d1t:"Objektiv kvalitetsbedömning",d1b:"Ingen magkänsla. Scannern mäter, AI:n bedömer — i mikrometer, reproducerbart, dokumenterat.",d2t:"För varje material",d2b:"Icke-laserkvalitet, specialstål, varierande batcher — Cutting Assistant anpassar parametrar till materialet, inte tvärtom.",d3t:"Ett system som lär",d3b:"Varje mjukvaruuppdatering du får via nedladdning gör systemet bättre. Utan tillägg, utan avbrott.",cmpH:"Vad ditt team gör utan Cutting Assistant — och vad som är möjligt efteråt",cmpL:"Utan Cutting Assistant",cmpR:"Med Cutting Assistant",c1l:"Timmar av manuell parametersökning",c1r:"Optimering på några skärgångar",c2l:"Beroende av expertkunskap",c2r:"Varje operatör kan optimera",c3l:"Kassationer på specialmaterial",c3r:"Exakta parametrar för varje batch",c4l:"Kunskap försvinner vid personalbyte",c4r:"Parametrar förblir dokumenterade i systemet",c5l:"Subjektiv kvalitetsbedömning",c5r:"Objektiv mätning i mikrometer",eq:'"The Cutting Assistant is a great example of how AI-enabled tools can help overcome problems related to the skilled worker shortage and also saves time and money."',m2:"min. 6 kW effekt",m3:"Köp från maj 2025",m4:"Uppdateringar via nedladdning",frmH:"Redo för din första förfrågan?",frmSub:"Berätta om din tillverkning. Vi återkommer med en individuell bedömning.",matsQ:"Vilka material skär du främst?",frmCta:"Begär rådgivningssamtal"},
+    rs:{h1:"Industriell AI möter grundforskning. Vad kan uppstå?",sub:"TRUMPF öppnar Cutting Assistants ekosystem för forskningspartner — från dataåtkomst till gemensam modellutveckling.",cta1:"Begär samarbetssamtal",cta2:"Ladda ned tekniskt whitepaper",heroImg:"Heatmap-overlay skärkant",t1:"518,5 mln EUR FoU-budget",t2:"3 006 medarbetare i produktutveckling",t3:"Globala forskningspartnerskap",whyH:"Vad inget labb i världen har — och vad vi bidrar med",why1:"Verkliga produktionsdata från hundratals tillverkningsföretag världen över. Verkliga material med verkliga batchvariationer. Verkliga fel, systematiskt registrerade och bedömda.",why2:"Denna databas är grunden där industriell AI växer bortom demonstratorer — och den finns inte tillgänglig i denna form någon annanstans.",dp1:"Skärkant-skanningsdata",dp2:"Parameterpar",dp3:"Kvalitetsmått i µm",dp4:"Anonymiserade materialklasser",dp5:"Optimeringsförlopp",dp6:"Multi-maskinskalning",tierH:"Tre vägar till samarbete",tFor:"För vem:",tWhat:"Vad:",tPriv:"Dataskydd:",tGive:"I gengäld:",tSetup:"Setup:",tier1t:"Dataåtkomst",tier1who:"Algoritmforskning, benchmarks, masteruppsatser",tier1what:"Anonymiserade datasets (skanningsbilder, parameterpar, kvalitetsmått)",tier1priv:"Fullständig anonymisering — inga slutsatser om verksamheter möjliga",tier1give:"Tack i publikationer, valfritt modellvikter",tier2t:"Weight Sharing / Federated Fine-Tuning",tier2who:"Institut med GPU-kluster, DFG-projekt, doktorander",tier2what:"Lokal omträning; utbyte endast av vikt-deltan — inga rådata",tier2setup:"TRUMPF tillhandahåller basmodell och fine-tuning-skript; partnern skickar deltan; TRUMPF aggregerar och validerar",tier2give:"Medförfattarskap, valfritt licensavgifter",tier3t:"On-premise deployment + kodsamarbete",tier3who:"Fraunhofer-institut, strategiska partner, industriforskning",tier3what:"Exporterbar modellarkitektur (inference + fine-tuning-huvud); gemensam modulutveckling",tier3setup:"TRUMPF behåller IP på basmodellen; samutvecklade tillägg under förhandlad IP-regim",tier3give:"Samutvecklingsavtal; tillgång till testmaskiner hos TRUMPF",openH:"Var vi söker svar — och bjuder in partner",o1t:"Generaliserbar skärkantmodell",o1b:"Few-shot-inlärning och domänanpassning för nya materialklasser.",o2t:"Osäkerhetskvantifiering",o2b:"Konfidensbaserat beslutsstöd i industriella AI-system.",o3t:"Fysikinformerad AI",o3b:"Kombinera FEM-simulering och fältdata för fysiskt konsekventa modeller.",o4t:"Förklarbarhet (XAI)",o4b:"Vilka drag i skärkant-skanningar driver parameterrekommendationen?",o5t:"Människa-AI-interaktion",o5b:"Hur accepterar tillverkningsmedarbetare AI-rekommendationer, när överrider de systemet?",o6t:"Standardisering och certifiering",o6b:"Krav på AI-processoptimering inom flyg, medicinteknik, fordon.",visH:"Cutting Assistant är bara början.",vis1:"Vi bygger ett benchmark-dataset för laserparametrar — jämförbart med vad ImageNet gjorde för bildigenkänning.",vis2:"Vi utvecklar ett federerat lärnätverk över hundratals maskiner världen över, utan att rådata någonsin lämnar vårt ekosystem.",vis3:"Och vi arbetar med ett certifieringsramverk för AI i tillverkning — tillsammans med standardiseringsorgan, inte parallellt med dem.",crH:"Vem kan bli partner?",cr1:"Aktiv expertis inom datorseende, maskininlärning, tillverkningsteknik eller materialvetenskap.",cr2:"Tydliga vetenskapliga mål — ingen uppdragsforskning utan kunskapsbidrag.",cr3:"Vilja att dela resultat rättvist — i publikationer, modeller, data.",cr4:"Förbindelse till data- och IP-avtal.",crNote:"Vi prövar varje förfrågan individuellt. Vetenskaplig potential och strategisk passning avgör — inte storleken på institutionen.",frmH:"Låt oss talas vid.",inst:"Institution",pos:"Befattning",field:"Område",f3:"Tillverkningsteknik",f4:"Materialvetenskap",f5:"Människa-maskin-interaktion",f6:"Standardisering / Juridik / Etik",phoneOpt:"Telefon (valfritt)",interest:"Forskningsintresse",collab:"Samarbetsmodell",cb1:"Dataåtkomst",cb2:"Weight sharing",cb3:"On-premise deployment",cb4:"Fortfarande öppet",funded:"Externfinansierat projekt finns",r1:"Ja",r2:"Nej",r3:"Under planering",frmCta:"Skicka samarbetsförfrågan",frmNote:"Din förfrågan granskas inom fem arbetsdagar. All information behandlas konfidentiellt."}
+  },
+  fr:{
+    nav:{existing:"Clients existants",new:"Nouveaux clients",research:"Recherche",openChat:"Ouvrir le chatbot"},
+    form:{success:"Merci. Nous vous répondrons sous 2 jours ouvrés.",name:"Nom",company:"Entreprise",machine:"Numéro de machine",email:"E-mail",phone:"Téléphone",message:"Message",submit:"Envoyer",privacy:"Politique de confidentialité",first:"Prénom",last:"Nom",industry:"Secteur",country:"Pays",employees:"Nombre d'employés",indOpt1:"Sous-traitance",indOpt2:"Construction mécanique",indOpt4:"Technologie médicale",indOpt5:"Autre"},
+    chat:{title:"Cutting Assistant — Posez-moi vos questions",placeholder:"Poser une question...",send:"Envoyer",error:"Désolé, il y a eu un problème technique. Veuillez réessayer.",welcome:"Bonjour ! Je réponds aux questions sur le TRUMPF Cutting Assistant."},
+    ex:{h1:"Votre machine connaît le matériau. Maintenant elle apprend à le gérer.",sub:"Le Cutting Assistant optimise vos paramètres de coupe automatiquement — directement sur votre TruLaser existante à partir de 6 kW.",cta1:"Activer maintenant",cta2:"Voir la démo",heroImg:"Image hero : Scanner en action",problemH:"Ça vous parle ?",p1t:"Mauvais bords sur matériaux spéciaux",p1b:"Votre matériau de référence fonctionne parfaitement. Mais dès qu'un nouveau lot arrive ou qu'un client commande un matériau spécial, la recherche manuelle des bons paramètres recommence — depuis le début.",p2t:"Des heures à chercher les paramètres",p2b:"Un opérateur expérimenté passe des heures à ajuster les paramètres un par un. Du temps perdu pour la production.",p3t:"Le savoir se perd",p3b:"Quand l'opérateur expérimenté est malade ou quitte l'entreprise, la connaissance des paramètres part avec lui. Le suivant recommence à zéro.",howH:"Comment fonctionne le Cutting Assistant",s1t:"Scanner",s1b:"Saisir le bord de coupe avec le scanner manuel. Cela prend quelques secondes.",s2t:"Faire évaluer",s2b:"L'IA analyse la rugosité et la hauteur de bavure en micromètres. Objectif et reproductible.",s3t:"Appliquer l'optimisation",s3b:"Le Cutting Assistant propose de nouveaux paramètres. Vous confirmez. La machine coupe à nouveau.",s4t:"Terminé",s4b:"Après environ 5 itérations : bord de coupe parfait, paramètres documentés, aucune expertise consommée.",specH:"Ce que le Cutting Assistant sait faire aujourd'hui",tCol1:"Mode",tCol2:"Matériau",tCol3:"Épaisseur",tCol4:"Statut",tR1c1:"Mode IA",tR1c2:"Acier doux azote",tR2c1:"Mode bande large",tR3c2:"Acier inoxydable azote",tR4c3:"à partir de mars 2026",avail:"Disponible",soon:"Bientôt",retrofit:"Vous avez une machine plus ancienne ? Parlez à votre contact TRUMPF des options de retrofit disponibles.",pill2:"min. 6 kW",pill3:"Achat à partir de mai 2025",pill4:"Mise à jour en ligne",roiH:"Que pouvez-vous économiser concrètement ?",roi1:"Heures/semaine de recherche de paramètres",roi2:"Coûts de production EUR/heure",roi3:"Pièces de rebut par semaine",roi4:"Valeur matière par pièce en EUR",roiTime:"Économie de temps par mois",roiScrap:"Réduction des rebuts par mois",roiTotal:"Potentiel total par an",roiDisc:"Estimation basée sur vos données. Parlez à votre conseiller TRUMPF pour une analyse individuelle.",testH:"Ce que disent les utilisateurs",q1:"Avant, il me fallait une heure pour trouver de bons paramètres pour une nouvelle tôle. Maintenant, c'est cinq coupes.",q1a:"— Opérateur machine, sous-traitant",q2:"Nous avons activé le Cutting Assistant un vendredi. Le lundi, nos apprentis travaillaient avec — sans formation.",q2a:"— Responsable production",faqH:"Questions fréquentes",faq1q:"Dois-je acheter une nouvelle machine ?",faq1a:"Non. Le Cutting Assistant est disponible pour toutes les TruLaser à partir de 6 kW achetées ou retrofittées depuis mai 2025.",faq2q:"Mes données matériaux sont-elles transférées ?",faq2a:"Vos données restent anonymes. TRUMPF ne reçoit aucune information permettant de déduire votre expertise.",faq3q:"Combien de temps prend l'installation ?",faq3a:"Le Cutting Assistant est déployé par mise à jour en ligne. Aucun montage, aucun arrêt.",faq4q:"Fonctionne-t-il avec des matériaux spéciaux sans qualité laser ?",faq4a:"Oui. C'est précisément pour cela que le Cutting Assistant a été développé.",ctaH:"Prêt à améliorer vos bords de coupe ?"},
+    nw:{h1:"Des bords de coupe parfaits. Dès le premier jour. Sans experts.",sub:"Le TRUMPF Cutting Assistant utilise l'intelligence artificielle pour optimiser automatiquement vos paramètres de découpe laser — quel que soit le matériau, quelle que soit l'expérience de votre équipe.",cta1:"Demander un conseil",cta2:"Comment ça marche",heroImg:"Image hero : machine TruLaser",t1:"Plus de 100 ans d'expérience en production",t2:"Leader mondial de la technologie laser",t3:"Innovation IA depuis 2025",ctxH:"Le défi de la production moderne",ctx1:"Les ouvriers qualifiés sont difficiles à trouver. Les qualités de matériaux varient. Les exigences de tolérance augmentent.",ctx2:"Acheter aujourd'hui une machine de découpe laser, c'est décider de la compétitivité de son entreprise dans cinq ans.",ctx3:"Le Cutting Assistant est la réponse de TRUMPF à cette réalité.",prodImg:"Image produit / Screencast",prodH:"Le Cutting Assistant — l'IA dans votre production",prod1:"Entièrement intégré à la commande TruLaser. Pas de matériel séparé, pas de formation supplémentaire.",prod2:"Scanner, évaluer, appliquer — un flux en trois étapes qui fait de chaque opérateur un expert des paramètres.",prod3:"Après en moyenne cinq itérations, le système livre un bord de coupe optimisé, documenté pour le lot suivant.",diffH:"Ce que les autres machines ne savent pas faire",d1t:"Évaluation objective de la qualité",d1b:"Pas d'intuition. Le scanner mesure, l'IA évalue — en micromètres, de façon reproductible et documentée.",d2t:"Pour chaque matériau",d2b:"Matériau non qualité laser, aciers spéciaux, lots variables — le Cutting Assistant adapte les paramètres au matériau, et non l'inverse.",d3t:"Un système qui apprend",d3b:"Chaque mise à jour logicielle reçue par téléchargement améliore le système. Sans supplément, sans interruption.",cmpH:"Ce que fait votre équipe sans Cutting Assistant — et ce qui devient possible ensuite",cmpL:"Sans Cutting Assistant",cmpR:"Avec Cutting Assistant",c1l:"Recherche manuelle de paramètres pendant des heures",c1r:"Optimisation en quelques passes de coupe",c2l:"Dépendance à l'expertise",c2r:"Chaque opérateur peut optimiser",c3l:"Rebut sur matériaux spéciaux",c3r:"Paramètres précis pour chaque lot",c4l:"Le savoir se perd lors des changements de personnel",c4r:"Les paramètres restent documentés dans le système",c5l:"Évaluation subjective de la qualité",c5r:"Mesure objective en micromètres",eq:'"The Cutting Assistant is a great example of how AI-enabled tools can help overcome problems related to the skilled worker shortage and also saves time and money."',m2:"min. 6 kW de puissance",m3:"Achat à partir de mai 2025",m4:"Mises à jour par téléchargement",frmH:"Prêt pour votre première demande ?",frmSub:"Parlez-nous de votre production. Nous reviendrons vers vous avec une évaluation individuelle.",matsQ:"Quels matériaux découpez-vous principalement ?",frmCta:"Demander un entretien-conseil"},
+    rs:{h1:"L'IA industrielle rencontre la recherche fondamentale. Que pourrait-il en naître ?",sub:"TRUMPF ouvre l'écosystème du Cutting Assistant aux partenaires de recherche — de l'accès aux données au développement conjoint de modèles.",cta1:"Demander un entretien de coopération",cta2:"Télécharger le whitepaper technique",heroImg:"Heatmap du bord de coupe",t1:"518,5 M EUR de budget R&D",t2:"3 006 collaborateurs en développement produit",t3:"Partenariats de recherche mondiaux",whyH:"Ce qu'aucun laboratoire au monde n'a — et ce que nous apportons",why1:"Des données de production réelles provenant de centaines d'entreprises de fabrication dans le monde. Des matériaux réels avec de vraies variations de lot. De vrais défauts, saisis et évalués systématiquement.",why2:"Cette base de données est ce qui permet à l'IA industrielle de dépasser les démonstrateurs — et elle n'est disponible sous cette forme nulle part ailleurs.",dp1:"Données de scan de bord",dp2:"Paires de paramètres",dp3:"Métriques de qualité en µm",dp4:"Classes de matériaux anonymisées",dp5:"Trajectoires d'optimisation",dp6:"Mise à l'échelle multi-machine",tierH:"Trois voies de collaboration",tFor:"Pour qui :",tWhat:"Quoi :",tPriv:"Protection des données :",tGive:"En contrepartie :",tSetup:"Setup :",tier1t:"Accès aux données",tier1who:"Recherche algorithmique, benchmarks, mémoires de master",tier1what:"Jeux de données anonymisés (images de scan, paires de paramètres, métriques de qualité)",tier1priv:"Anonymisation complète — aucune déduction possible sur les exploitations",tier1give:"Remerciements dans les publications, optionnellement poids du modèle",tier2t:"Weight Sharing / Fine-tuning fédéré",tier2who:"Instituts avec cluster GPU, projets DFG, doctorats",tier2what:"Réentraînement local ; échange uniquement des deltas de poids — aucune donnée brute",tier2setup:"TRUMPF fournit le modèle de base et les scripts de fine-tuning ; le partenaire envoie les deltas ; TRUMPF agrège et valide",tier2give:"Co-auteur, optionnellement redevances",tier3t:"Déploiement on-premise + collaboration code",tier3who:"Instituts Fraunhofer, partenaires stratégiques, recherche industrielle",tier3what:"Architecture de modèle exportable (inférence + tête fine-tuning) ; développement conjoint de modules",tier3setup:"TRUMPF conserve la PI sur le modèle de base ; extensions co-développées sous régime de PI négocié",tier3give:"Contrat de co-développement ; accès aux machines de test chez TRUMPF",openH:"Où nous cherchons des réponses — et invitons des partenaires",o1t:"Modèle de bord de coupe généralisable",o1b:"Few-shot learning et adaptation de domaine pour nouvelles classes de matériaux.",o2t:"Quantification de l'incertitude",o2b:"Aide à la décision basée sur la confiance dans les systèmes d'IA industriels.",o3t:"IA informée par la physique",o3b:"Combiner simulation FEM et données de terrain pour des modèles physiquement cohérents.",o4t:"Explicabilité (XAI)",o4b:"Quelles caractéristiques dans les scans de bord guident la recommandation de paramètres ?",o5t:"Interaction homme-IA",o5b:"Comment les opérateurs acceptent-ils les recommandations de l'IA, quand outrepassent-ils le système ?",o6t:"Normalisation et certification",o6b:"Exigences pour l'optimisation de process par IA en aéronautique, médical, automobile.",visH:"Le Cutting Assistant n'est qu'un début.",vis1:"Nous construisons un jeu de données de référence pour les paramètres laser — comparable à ce qu'ImageNet a fait pour la reconnaissance d'images.",vis2:"Nous développons un réseau d'apprentissage fédéré sur des centaines de machines dans le monde, sans qu'aucune donnée brute ne quitte notre écosystème.",vis3:"Et nous travaillons à un cadre de certification pour l'IA dans la fabrication — avec les organismes de normalisation, pas en parallèle.",crH:"Qui peut devenir partenaire ?",cr1:"Expertise active en vision par ordinateur, apprentissage automatique, technique de fabrication ou science des matériaux.",cr2:"Objectifs scientifiques clairs — pas de recherche sur contrat sans contribution épistémique.",cr3:"Volonté de partager équitablement les résultats — dans les publications, modèles, données.",cr4:"Engagement sur les accords de données et de PI.",crNote:"Nous examinons chaque demande individuellement. Le potentiel scientifique et l'adéquation stratégique décident — pas la taille de l'institution.",frmH:"Parlons-en.",inst:"Institution",pos:"Poste",field:"Spécialité",f3:"Technique de fabrication",f4:"Science des matériaux",f5:"Interaction homme-machine",f6:"Normalisation / Droit / Éthique",phoneOpt:"Téléphone (facultatif)",interest:"Intérêt de recherche",collab:"Modèle de collaboration",cb1:"Accès aux données",cb2:"Weight sharing",cb3:"Déploiement on-premise",cb4:"Encore ouvert",funded:"Projet à financement externe disponible",r1:"Oui",r2:"Non",r3:"En planification",frmCta:"Envoyer la demande de coopération",frmNote:"Votre demande sera examinée sous cinq jours ouvrés. Toutes les informations sont traitées de manière confidentielle."}
+  }
+};
+
+// ===== STATE =====
+let lang = 'de';
+let currentPage = 'existing';
+const LANGS = ['DE','EN','ES','NL','IT','SV','FR'];
+
+// ===== I18N =====
+function get(path,langCode){
+  return path.split('.').reduce((o,k)=>o&&o[k],T[langCode]) || path.split('.').reduce((o,k)=>o&&o[k],T.de) || path;
+}
+function applyI18n(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v = get(el.dataset.i18n, lang);
+    if(v) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-attr]').forEach(el=>{
+    const [attr,key] = el.dataset.i18nAttr.split('|');
+    const v = get(key,lang);
+    if(v) el.setAttribute(attr,v);
+  });
+  // selects with translated options
+  document.querySelectorAll('select option[data-i18n]').forEach(opt=>{
+    const v = get(opt.dataset.i18n, lang);
+    if(v) opt.textContent = v;
+  });
+  renderLangSwitch();
+}
+function renderLangSwitch(){
+  ['langSwitch','langSwitchMobile'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = LANGS.map(L=>`<button data-lang="${L.toLowerCase()}" class="${L.toLowerCase()===lang?'active':''}">${L}</button>`).join('');
+    el.querySelectorAll('button').forEach(b=>b.onclick=()=>{lang=b.dataset.lang;applyI18n();});
+  });
+}
+
+// ===== NAV =====
+function showPage(p){
+  currentPage = p;
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav-links a, .mobile-menu a').forEach(a=>{
+    a.classList.toggle('active', a.dataset.page===p);
+  });
+  document.getElementById('mobileMenu').classList.remove('open');
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('[data-page]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();showPage(a.dataset.page)}));
+document.getElementById('hamburger').onclick=()=>document.getElementById('mobileMenu').classList.toggle('open');
+
+// ===== FAQ =====
+document.querySelectorAll('.faq-q').forEach(q=>q.addEventListener('click',()=>q.parentElement.classList.toggle('open')));
+
+// ===== ROI =====
+function fmt(n){return Math.round(n).toLocaleString('de-DE')}
+function updateRoi(){
+  const h = +document.getElementById('roi-hours').value||0;
+  const c = +document.getElementById('roi-cost').value||0;
+  const s = +document.getElementById('roi-scrap').value||0;
+  const m = +document.getElementById('roi-mat').value||0;
+  const time = h*4*c;
+  const scrap = s*4*m*0.8;
+  const total = (time+scrap)*12;
+  document.getElementById('roi-time').textContent = fmt(time)+' EUR/Monat';
+  document.getElementById('roi-scrapv').textContent = fmt(scrap);
+  document.getElementById('roi-total').textContent = fmt(total)+' EUR/Jahr';
+}
+['roi-hours','roi-cost','roi-scrap','roi-mat'].forEach(id=>document.getElementById(id).addEventListener('input',updateRoi));
+updateRoi();
+
+// ===== FORMS =====
+function submitForm(e){
+  e.preventDefault();
+  const f = e.target;
+  const ok = f.querySelector('.success');
+  ok.classList.add('show');
+  setTimeout(()=>{f.reset();ok.classList.remove('show');},2000);
+  return false;
+}
+
+// ===== CHATBOT =====
+const SYSTEM_PROMPT = "You are the TRUMPF Cutting Assistant expert chatbot. You answer questions exclusively about the TRUMPF Cutting Assistant product. Your knowledge covers: what the Cutting Assistant is (an AI-powered laser cutting edge optimization tool for TruLaser machines with 6kW or higher, purchased from May 2025); its two modes (AI mode with hand scanner for Baustahl Stickstoff 5–15mm, and bandwidth mode for full material range including Edelstahl and Aluminium); its benefits (objective edge quality measurement in micrometers, no programming knowledge required, compensates for skilled worker shortage, continuous improvement through field data); technical requirements (TruLaser 2D series, min 6kW, purchase from May 2025, online updates); the three research collaboration models (anonymized data sharing, weight sharing via federated fine-tuning, on-premise code collaboration); and all public press release information about the product. If a user asks about anything unrelated to the TRUMPF Cutting Assistant, respond politely that you can only answer questions about the Cutting Assistant. Respond in the same language the user writes in. Keep answers concise and professional.";
+
+const chatPanel = document.getElementById('chatPanel');
+const chatFeed = document.getElementById('chatFeed');
+const chatInput = document.getElementById('chatInput');
+let chatHistory = [];
+
+function openChat(){
+  chatPanel.classList.add('open');
+  if(chatHistory.length===0){addBot(get('chat.welcome',lang))}
+  setTimeout(()=>chatInput.focus(),100);
+}
+document.getElementById('openChat').onclick=openChat;
+document.getElementById('chatFab').onclick=openChat;
+document.getElementById('chatClose').onclick=()=>chatPanel.classList.remove('open');
+
+function addUser(text){
+  const d=document.createElement('div');d.className='chat-msg user';d.textContent=text;chatFeed.appendChild(d);chatFeed.scrollTop=chatFeed.scrollHeight;
+}
+function addBot(text){
+  const row=document.createElement('div');row.className='chat-bot-row';
+  row.innerHTML=`<div class="avatar">T</div><div class="chat-msg bot"></div>`;
+  row.querySelector('.chat-msg').textContent=text;
+  chatFeed.appendChild(row);chatFeed.scrollTop=chatFeed.scrollHeight;
+}
+function addTyping(){
+  const row=document.createElement('div');row.className='chat-bot-row';row.id='typingRow';
+  row.innerHTML=`<div class="avatar">T</div><div class="chat-msg bot"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  chatFeed.appendChild(row);chatFeed.scrollTop=chatFeed.scrollHeight;
+}
+function removeTyping(){const t=document.getElementById('typingRow');if(t)t.remove();}
+
+// API KEY: replace with your Anthropic API key, or wire to your backend
+const ANTHROPIC_API_KEY = ""; // <-- Paste your key here for local testing
+
+async function sendMessage(userText){
+  addUser(userText);
+  chatHistory.push({role:'user',content:userText});
+  addTyping();
+  try{
+    if(!ANTHROPIC_API_KEY){
+      await new Promise(r=>setTimeout(r,600));
+      removeTyping();
+      addBot("[Demo] " + get('chat.welcome',lang) + " Bitte konfigurieren Sie einen Anthropic API-Key in der HTML-Datei, um den Live-Chat zu aktivieren.");
+      return;
+    }
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':ANTHROPIC_API_KEY,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1024,
+        system:SYSTEM_PROMPT,
+        messages:chatHistory
+      })
+    });
+    const data = await res.json();
+    removeTyping();
+    if(data.content && data.content[0]){
+      const reply = data.content[0].text;
+      chatHistory.push({role:'assistant',content:reply});
+      addBot(reply);
+    } else { addBot(get('chat.error',lang)); }
+  }catch(err){
+    removeTyping();
+    addBot(get('chat.error',lang));
+  }
+}
+
+document.getElementById('chatForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const v = chatInput.value.trim();
+  if(!v) return;
+  chatInput.value='';
+  sendMessage(v);
+});
+
+// init
+applyI18n();
+</script>
+</body>
+</html>
