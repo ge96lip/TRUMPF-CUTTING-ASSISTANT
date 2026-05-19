@@ -18,6 +18,7 @@
   --shadow:0 2px 8px rgba(0,0,0,0.07);
 }
 *{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
 html,body{font-family:'IBM Plex Sans',sans-serif;font-weight:400;color:var(--color-text);background:var(--color-bg);line-height:1.55;-webkit-font-smoothing:antialiased}
 h1,h2,h3,h4{font-weight:500;line-height:1.2}
 h1{font-size:clamp(2rem,4vw,3rem)}
@@ -44,8 +45,12 @@ label{display:block;font-size:.875rem;margin-bottom:6px;font-weight:500}
 
 /* Nav */
 .nav{position:sticky;top:0;z-index:50;background:#fff;border-bottom:var(--border)}
-.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;gap:24px}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;min-height:72px;gap:24px;padding-top:8px;padding-bottom:8px}
 .logo{font-weight:700;font-size:1.25rem;letter-spacing:.5px;color:var(--color-text)}
+.brand-logo{display:inline-flex;flex-direction:column;align-items:flex-start;gap:4px;color:#000;text-decoration:none;line-height:1}
+.brand-logo:hover{text-decoration:none}
+.brand-logo-word{font-weight:700;font-size:1rem;letter-spacing:0;color:#000}
+.brand-logo-mark{width:56px;height:41px;background:#1238C4;display:block}
 .nav-links{display:flex;gap:32px;flex:1;justify-content:center}
 .nav-links a{color:var(--color-text);font-weight:500;padding:8px 0;border-bottom:2px solid transparent;cursor:pointer}
 .nav-links a.active{border-bottom-color:var(--color-accent)}
@@ -55,12 +60,13 @@ label{display:block;font-size:.875rem;margin-bottom:6px;font-weight:500}
 .lang-switch button.active{border-bottom-color:var(--color-accent);color:var(--color-text)}
 .hamburger{display:none;width:40px;height:40px;flex-direction:column;justify-content:center;align-items:center;gap:5px}
 .hamburger span{width:24px;height:2px;background:var(--color-text)}
-.mobile-menu{display:none;position:fixed;inset:64px 0 0;background:#fff;z-index:40;padding:32px 24px;flex-direction:column;gap:24px}
+.mobile-menu{display:none;position:fixed;inset:72px 0 0;background:#fff;z-index:40;padding:32px 24px;flex-direction:column;gap:24px}
 .mobile-menu.open{display:flex}
 .mobile-menu a{font-size:1.25rem;color:var(--color-text);font-weight:500}
 
 /* Sections */
 section{padding:64px 0}
+section[id]{scroll-margin-top:88px}
 .bg-white{background:var(--color-white)}
 .bg-off{background:var(--color-bg)}
 .bg-blue{background:var(--color-blue);color:#fff}
@@ -108,6 +114,25 @@ section{padding:64px 0}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
 .dot-green{background:var(--color-accent)}
 .dot-grey{background:#999}
+.capability-overview{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:24px 0}
+.capability-card{background:#fff;border:var(--border);border-radius:8px;overflow:hidden}
+.capability-card header{padding:18px 20px;border-bottom:var(--border);background:var(--color-bg)}
+.capability-card h3{margin:0}
+.capability-card .scope{font-size:.875rem;color:#555;margin-top:4px}
+.capability-body{display:grid;gap:18px;padding:20px}
+.capability-group h4{font-size:.9rem;text-transform:uppercase;letter-spacing:.04em;color:#555;margin-bottom:10px}
+.coverage-list{display:grid;gap:8px;list-style:none}
+.coverage-list li{display:grid;grid-template-columns:minmax(160px,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:var(--border);font-size:.95rem}
+.coverage-list li:last-child{border-bottom:none}
+.range-pill{display:inline-flex;align-items:center;justify-content:center;min-width:88px;padding:4px 10px;border-radius:4px;font-weight:500;font-size:.875rem;white-space:nowrap}
+.range-pill.available{background:rgba(125,181,0,.18);color:#4f7600}
+.range-pill.planned{background:#E2E4E6;color:#444}
+.coverage-note{font-size:.875rem;color:#555;margin-top:8px}
+.capability-legend{display:flex;gap:18px;flex-wrap:wrap;margin:-8px 0 16px;font-size:.9rem;color:#555}
+.capability-legend span{display:flex;align-items:center;gap:8px}
+.legend-box{width:14px;height:14px;border-radius:3px;display:inline-block}
+.legend-box.available{background:var(--color-accent)}
+.legend-box.planned{background:#C9CBCE}
 .info-box{background:rgba(125,181,0,.1);border-left:4px solid var(--color-accent);padding:16px;border-radius:4px;margin:16px 0}
 .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .pill{background:var(--color-bg);padding:6px 12px;border-radius:4px;font-size:.875rem;border:var(--border)}
@@ -191,8 +216,15 @@ section{padding:64px 0}
   .lang-switch{display:none}
   .hamburger{display:flex}
   .nav .btn{display:none}
+  .nav-inner{min-height:72px}
+  .brand-logo-word{font-size:1rem}
+  .brand-logo-mark{width:56px;height:41px}
+  .mobile-menu{inset:72px 0 0}
   .chatbot-fab{display:flex}
   .hero-grid,.grid-2,.grid-3,.grid-4,.steps,.grid-3x2,.roi-grid{grid-template-columns:1fr}
+  .capability-overview{grid-template-columns:1fr}
+  .coverage-list li{grid-template-columns:1fr}
+  .range-pill{width:max-content}
   .form-row{grid-template-columns:1fr}
   section{padding:48px 0}
   h1{font-size:1.875rem}
@@ -211,7 +243,10 @@ section{padding:64px 0}
 <!-- NAV -->
 <nav class="nav">
   <div class="container nav-inner">
-    <div class="logo">TRUMPF</div>
+    <a class="brand-logo" data-page="existing" aria-label="TRUMPF Startseite">
+      <span class="brand-logo-word">TRUMPF</span>
+      <span class="brand-logo-mark" aria-hidden="true"></span>
+    </a>
     <div class="nav-links">
       <a data-page="existing" class="active" data-i18n="nav.existing">Bestandskunden</a>
       <a data-page="new" data-i18n="nav.new">Neukunden</a>
@@ -239,8 +274,8 @@ section{padding:64px 0}
         <h1 data-i18n="ex.h1">Ihre Maschine kennt das Material. Jetzt lernt sie, damit umzugehen.</h1>
         <p class="sub" data-i18n="ex.sub">Der Cutting Assistant optimiert Ihre Schneidparameter automatisch — direkt auf Ihrer bestehenden TruLaser ab 6 kW.</p>
         <div class="hero-ctas">
-          <a class="btn btn-primary" data-i18n="ex.cta1">Jetzt freischalten</a>
-          <a class="btn btn-outline" data-i18n="ex.cta2">Demo anschauen</a>
+          <a class="btn btn-primary" href="#existing-cta" data-i18n="ex.cta1">Jetzt freischalten</a>
+          <a class="btn btn-outline" href="https://www.youtube.com/watch?v=o1MlP6caIrk" data-i18n="ex.cta2">Demo anschauen</a>
         </div>
       </div>
       <div class="img-ph" data-i18n="ex.heroImg">Hero image: Scanner in Aktion</div>
@@ -337,7 +372,7 @@ section{padding:64px 0}
     </div>
   </section>
 
-  <section class="bg-green">
+  <section class="bg-green" id="existing-cta">
     <div class="container">
       <h2 data-i18n="ex.ctaH">Bereit, Ihre Schnittkanten zu verbessern?</h2>
       <form class="form" onsubmit="return submitForm(event)">
