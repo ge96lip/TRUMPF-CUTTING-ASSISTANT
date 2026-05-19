@@ -781,11 +781,17 @@ function renderLangSwitch(){
 
 // ===== NAV =====
 const PAGES = ['existing','new','research'];
+const SECTION_PAGES = {
+  'existing-cta': 'existing',
+  'new-cta': 'new',
+  'research-cta': 'research'
+};
 function pageFromHash(){
   const p = window.location.hash.replace('#','');
-  return PAGES.includes(p) ? p : 'existing';
+  if(PAGES.includes(p)) return p;
+  return SECTION_PAGES[p] || 'existing';
 }
-function showPage(p){
+function showPage(p, opts = {}){
   if(!PAGES.includes(p)) p = 'existing';
   currentPage = p;
   const pageToggle = document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1)+'Toggle');
@@ -797,7 +803,13 @@ function showPage(p){
   });
   document.getElementById('mobileMenu').classList.remove('open');
   document.getElementById('navToggle').checked = false;
-  window.scrollTo(0,0);
+  if(opts.scrollTop !== false) window.scrollTo(0,0);
+}
+function scrollToHashTarget(){
+  const id = window.location.hash.replace('#','');
+  if(!id || PAGES.includes(id)) return;
+  const target = document.getElementById(id);
+  if(target) requestAnimationFrame(()=>target.scrollIntoView({block:'start'}));
 }
 document.addEventListener('click', e=>{
   const link = e.target.closest('[data-page]');
@@ -806,8 +818,16 @@ document.addEventListener('click', e=>{
   showPage(link.dataset.page);
   try{history.replaceState(null,'','#'+link.dataset.page)}catch(err){}
 });
-window.addEventListener('hashchange', ()=>showPage(pageFromHash()));
-if(window.location.hash) showPage(pageFromHash());
+window.addEventListener('hashchange', ()=>{
+  const id = window.location.hash.replace('#','');
+  showPage(pageFromHash(), {scrollTop: PAGES.includes(id)});
+  scrollToHashTarget();
+});
+if(window.location.hash){
+  const id = window.location.hash.replace('#','');
+  showPage(pageFromHash(), {scrollTop: PAGES.includes(id)});
+  scrollToHashTarget();
+}
 document.getElementById('hamburger').addEventListener('keydown', e=>{
   if(e.key!=='Enter' && e.key!==' ') return;
   e.preventDefault();
