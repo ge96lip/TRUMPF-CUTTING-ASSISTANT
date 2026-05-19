@@ -103,21 +103,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
 .demo-item .check{width:24px;height:24px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;color:#fff;font-weight:700}
 .demo-item p{font-size:.9rem;color:rgba(255,255,255,.8);font-weight:400}
 
-/* 6. TECH + i18n */
-.s-tech{background:var(--w);display:flex;flex-direction:column}
-.s-tech .top-bar{height:6px;background:var(--g);flex-shrink:0}
-.s-tech .inner{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:64px;padding:64px 100px;align-items:center}
-.s-tech .section-tag{font-size:.7rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--g);margin-bottom:20px}
-.s-tech h2{font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:500;color:var(--k);margin-bottom:24px}
-.tech-list{display:grid;gap:12px}
-.tech-row{display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--dim)}
-.tech-dot{width:8px;height:8px;border-radius:50%;background:var(--g);flex-shrink:0}
-.tech-row span{font-size:.9rem;color:#333;line-height:1.4}
-.lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.lang-pill{background:var(--bg);border:1px solid var(--dim);border-radius:4px;padding:10px 12px;text-align:center;font-size:.8rem;font-weight:500;color:var(--k)}
-.lang-pill.featured{background:var(--g);color:#fff;border-color:var(--g)}
-
-/* 7. CHATBOT */
+/* 6. CHATBOT */
 .s-chat{background:var(--k)}
 .s-chat .inner{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:64px;padding:80px 100px;align-items:center}
 .s-chat .section-tag{font-size:.7rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--g);margin-bottom:20px}
@@ -138,7 +124,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
 .chat-mock-input span{flex:1;font-size:.75rem;color:rgba(255,255,255,.25);font-style:italic;font-family:'IBM Plex Mono',monospace}
 .chat-mock-input .send{width:28px;height:28px;background:var(--g);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#fff}
 
-/* 8. RESEARCH */
+/* 7. RESEARCH */
 .s-research{background:var(--b);display:flex;flex-direction:column}
 .s-research .inner{flex:1;padding:72px 100px;display:flex;flex-direction:column;justify-content:center}
 .s-research .section-tag{font-size:.7rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:20px}
@@ -150,7 +136,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
 .tier-body{font-size:.85rem;font-weight:300;color:rgba(255,255,255,.6);line-height:1.55}
 .tier-arrow{font-size:1.5rem;color:rgba(255,255,255,.15);margin:0 4px;align-self:center;display:flex;align-items:center;justify-content:center}
 
-/* 9. ROI */
+/* 8. ROI */
 .s-roi{background:var(--bg);display:flex;flex-direction:column}
 .s-roi .top-bar{height:6px;background:var(--g);flex-shrink:0}
 .s-roi .inner{flex:1;padding:64px 100px;display:flex;flex-direction:column;justify-content:center}
@@ -163,7 +149,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
 .roi-block .note{font-size:.8rem;color:#777;line-height:1.45}
 .roi-source{font-size:.75rem;font-family:'IBM Plex Mono',monospace;color:#999;margin-top:24px;letter-spacing:.04em}
 
-/* 10. DEPLOYMENT — "TOMORROW" */
+/* 9. DEPLOYMENT — "TOMORROW" */
 .s-deploy{background:var(--g);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
 .s-deploy h2{font-size:clamp(2.5rem,5vw,5rem);font-weight:700;color:#fff;line-height:1;margin-bottom:20px}
 .s-deploy .sub{font-size:1.25rem;font-weight:300;color:rgba(255,255,255,.8);max-width:580px;line-height:1.6;margin-bottom:48px}
@@ -172,21 +158,12 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
 .deploy-item .d-num{font-size:1.8rem;font-weight:700;color:#fff;font-family:'IBM Plex Mono',monospace;line-height:1;margin-bottom:6px}
 .deploy-item .d-label{font-size:.75rem;color:rgba(255,255,255,.75);line-height:1.3;font-weight:400}
 
-/* 11. ASK */
-.s-ask{background:var(--k);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
-.s-ask .tag{font-size:.75rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;color:var(--g);text-transform:uppercase;margin-bottom:24px}
-.s-ask h2{font-size:clamp(2rem,4vw,3.5rem);font-weight:700;color:#fff;margin-bottom:16px;max-width:700px;line-height:1.1}
-.s-ask .sub{font-size:1.1rem;font-weight:300;color:rgba(255,255,255,.5);max-width:520px;line-height:1.6;margin-bottom:40px}
-.ask-items{display:flex;flex-direction:column;gap:10px;max-width:560px;width:100%;text-align:left}
-.ask-item{display:flex;align-items:flex-start;gap:16px;padding:14px 20px;background:rgba(255,255,255,.04);border-radius:6px;border:1px solid rgba(255,255,255,.06)}
-.ask-item .num{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--g);font-weight:500;flex-shrink:0;padding-top:2px}
-.ask-item p{font-size:.9rem;color:rgba(255,255,255,.7);line-height:1.5}
 </style>
 </head>
 <body>
 
 <div class="progress" id="progress"></div>
-<div class="slide-num" id="slideNum">01 / 11</div>
+<div class="slide-num" id="slideNum">01 / 09</div>
 <div class="nav-dots" id="navDots"></div>
 <div class="arrow-hint left">← PREV</div>
 <div class="arrow-hint right">NEXT →</div>
@@ -215,10 +192,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
     <h2>Das Produkt ist exzellent. Die Welt weiß es noch nicht.</h2>
     <p>Der Cutting Assistant löst ein reales Problem in tausenden Fertigungsbetrieben weltweit. Fachkräftemangel. Sondermaterialien. Verlorenes Parameterwissen.</p>
     <p>Die Pressemitteilung ist draußen. Das Produktvideo existiert. Aber es gibt keine dedizierte digitale Anlaufstelle — für Bestandskunden, Neukunden oder Forschungspartner.</p>
-  </div>
-  <div class="right">
-    <div class="stat" style="margin-top:40px"><div class="stat-num">3</div><div class="stat-label">Klar definierte Zielgruppen mit fundamental verschiedenen Kaufmotiven</div></div>
-    <div class="stat" style="margin-top:40px"><div class="stat-num">7</div><div class="stat-label">Sprachmärkte, die heute noch nicht angesprochen werden</div></div>
   </div>
 </div>
 
@@ -302,42 +275,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
   </div>
 </div>
 
-<!-- SLIDE 6: TECH + LANGUAGES -->
-<div class="slide s-tech">
-  <div class="top-bar"></div>
-  <div class="inner">
-    <div>
-      <div class="section-tag">Technologie</div>
-      <h2>Keine Abhängigkeiten. Kein CMS. Sofort deploybar.</h2>
-      <div class="tech-list">
-        <div class="tech-row"><div class="tech-dot"></div><span>Einzelne HTML-Datei — upload auf trumpf.com, fertig</span></div>
-        <div class="tech-row"><div class="tech-dot"></div><span>IBM Plex Sans — nächste freie Alternative zum TRUMPF Corporate Font</span></div>
-        <div class="tech-row"><div class="tech-dot"></div><span>TRUMPF-Farben exakt (#7DB500 · #1E5799 · #1A1A1A · #F2F2F2)</span></div>
-        <div class="tech-row"><div class="tech-dot"></div><span>Chrome und Firefox — vollständig getestet</span></div>
-        <div class="tech-row"><div class="tech-dot"></div><span>Responsive ab 375px (iPhone SE) bis 1440px+</span></div>
-        <div class="tech-row"><div class="tech-dot"></div><span>GenAI API bereits verdrahtet — nur Key eintragen</span></div>
-        <div class="tech-row"><div class="tech-dot"></div><span>WCAG AA Kontrast auf allen interaktiven Elementen</span></div>
-      </div>
-    </div>
-    <div>
-      <div class="section-tag">Sprachen</div>
-      <h2>Sieben Märkte. Alle Texte übersetzt.</h2>
-      <div class="lang-grid">
-        <div class="lang-pill featured">DE</div>
-        <div class="lang-pill featured">EN</div>
-        <div class="lang-pill">ES</div>
-        <div class="lang-pill">NL</div>
-        <div class="lang-pill">IT</div>
-        <div class="lang-pill">SV</div>
-        <div class="lang-pill">FR</div>
-        <div class="lang-pill" style="background:#fff;color:#bbb;border:1px dashed #ccc;font-size:.75rem">+ beliebig</div>
-      </div>
-      <p style="font-size:.85rem;color:#555;margin-top:20px;line-height:1.5">Alle Strings sind in einem zentralen JSON-Objekt. Eine neue Sprache hinzufügen dauert unter einer Stunde.</p>
-    </div>
-  </div>
-</div>
-
-<!-- SLIDE 7: CHATBOT -->
+<!-- SLIDE 6: CHATBOT -->
 <div class="slide s-chat">
   <div class="inner">
     <div>
@@ -365,7 +303,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
   </div>
 </div>
 
-<!-- SLIDE 8: RESEARCH ANGLE -->
+<!-- SLIDE 7: RESEARCH ANGLE -->
 <div class="slide s-research">
   <div class="inner">
     <div class="section-tag">Strategische Differenzierung</div>
@@ -391,12 +329,11 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
   </div>
 </div>
 
-<!-- SLIDE 9: ROI -->
+<!-- SLIDE 8: ROI -->
 <div class="slide s-roi">
   <div class="top-bar"></div>
   <div class="inner">
-    <div class="section-tag">Warum jetzt</div>
-    <h2>Was jede Woche ohne Landing Page kostet.</h2>
+    <h2>Warum jetzt?</h2>
     <div class="roi-blocks">
       <div class="roi-block">
         <div class="num">∞</div>
@@ -418,7 +355,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
   </div>
 </div>
 
-<!-- SLIDE 10: DEPLOY TOMORROW -->
+<!-- SLIDE 9: DEPLOY TOMORROW -->
 <div class="slide s-deploy">
   <h2>Deploy.<br>Tomorrow.</h2>
   <p class="sub">Die Website ist fertig. Getestet. Responsive. Mehrsprachig. Der einzige fehlende Schritt ist Ihre Entscheidung.</p>
@@ -439,18 +376,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
       <div class="d-num">4</div>
       <div class="d-label">Link von Newsroom und Produktseite setzen</div>
     </div>
-  </div>
-</div>
-
-<!-- SLIDE 11: ASK -->
-<div class="slide s-ask">
-  <div class="tag">Entscheidung</div>
-  <h2>Drei Fragen.<br>Keine Folgekosten.</h2>
-  <p class="sub">Was wir heute von Ihnen brauchen, um morgen live zu gehen.</p>
-  <div class="ask-items">
-    <div class="ask-item"><div class="num">01</div><p>Freigabe zur Veröffentlichung der HTML-Datei auf trumpf.com oder einer Subdomain</p></div>
-    <div class="ask-item"><div class="num">02</div><p>Bereitstellung eines API-Keys (oder Weiterleitung an ein Backend-Team für 30 Minuten Konfiguration)</p></div>
-    <div class="ask-item"><div class="num">03</div><p>Kontakt zum Produktmarketing-Team für Austausch der Bildplatzhalter durch echte TRUMPF-Fotografie</p></div>
   </div>
 </div>
 
