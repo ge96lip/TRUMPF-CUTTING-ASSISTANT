@@ -217,7 +217,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
     <p>Die Pressemitteilung ist draußen. Das Produktvideo existiert. Aber es gibt keine dedizierte digitale Anlaufstelle — für Bestandskunden, Neukunden oder Forschungspartner.</p>
   </div>
   <div class="right">
-    <div class="stat"><div class="stat-num">0</div><div class="stat-label">Dedizierte Landing Pages für den Cutting Assistant zum heutigen Tag</div></div>
     <div class="stat" style="margin-top:40px"><div class="stat-num">3</div><div class="stat-label">Klar definierte Zielgruppen mit fundamental verschiedenen Kaufmotiven</div></div>
     <div class="stat" style="margin-top:40px"><div class="stat-num">7</div><div class="stat-label">Sprachmärkte, die heute noch nicht angesprochen werden</div></div>
   </div>
@@ -265,7 +264,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
         <div class="card-header green">Bestandskunden</div>
         <div class="card-body">
           <p>Partnerschaftlicher Ton. Identifikation mit dem Problem. ROI-Rechner für konkrete Einsparungen. FAQ zu Retrofit und Datenschutz.</p>
-          <p>Hero: "Ihre Maschine kennt das Material. Jetzt lernt sie, damit umzugehen."</p>
           <div class="target">Produktionsleiter · Maschinenführer · Lohnfertiger</div>
           <div class="cta-goal">→ Upgrade-Anfrage via MyTRUMPF</div>
         </div>
@@ -274,7 +272,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
         <div class="card-header blue">Neukunden</div>
         <div class="card-body">
           <p>Aspirationale Positionierung. Vergleichstabelle ohne/mit Cutting Assistant. Cutting Assistant als Kaufargument für die Maschine.</p>
-          <p>Hero: "Perfekte Schnittkanten. Vom ersten Tag an. Ohne Experten."</p>
           <div class="target">Geschäftsführer · Einkäufer · Betriebe im Umstieg</div>
           <div class="cta-goal" style="color:var(--b)">→ Beratungsgespräch Vertrieb</div>
         </div>
@@ -283,7 +280,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
         <div class="card-header dark">Forschung</div>
         <div class="card-body">
           <p>Wissenschaftlicher Ton. Drei Kooperationsmodelle. Offene Forschungsfragen als Einladung. Langfristige Plattformvision.</p>
-          <p>Hero: "Industrielle KI trifft Grundlagenforschung. Was könnte entstehen?"</p>
           <div class="target">Fraunhofer · Universitäten · DFG-Gruppen</div>
           <div class="cta-goal" style="color:var(--k)">→ Kooperationsanfrage Forschungsteam</div>
         </div>
@@ -319,7 +315,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
         <div class="tech-row"><div class="tech-dot"></div><span>TRUMPF-Farben exakt (#7DB500 · #1E5799 · #1A1A1A · #F2F2F2)</span></div>
         <div class="tech-row"><div class="tech-dot"></div><span>Chrome und Firefox — vollständig getestet</span></div>
         <div class="tech-row"><div class="tech-dot"></div><span>Responsive ab 375px (iPhone SE) bis 1440px+</span></div>
-        <div class="tech-row"><div class="tech-dot"></div><span>Anthropic API bereits verdrahtet — nur Key eintragen</span></div>
+        <div class="tech-row"><div class="tech-dot"></div><span>GenAI API bereits verdrahtet — nur Key eintragen</span></div>
         <div class="tech-row"><div class="tech-dot"></div><span>WCAG AA Kontrast auf allen interaktiven Elementen</span></div>
       </div>
     </div>
@@ -349,7 +345,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
       <h2>Ein Spezialist. Kein Generalist.</h2>
       <p>Der eingebettete Chatbot beantwortet ausschließlich Fragen zum Cutting Assistant. Er kennt beide Betriebsmodi, alle technischen Voraussetzungen, die Forschungskooperationsmodelle und alle Inhalte aus den öffentlichen Pressemitteilungen.</p>
       <p>Fragen zu anderen TRUMPF-Produkten, zu Preisen oder zu nicht-relevanten Themen werden höflich abgewiesen. Das Modell antwortet automatisch in der Sprache des Nutzers.</p>
-      <p style="margin-top:8px;font-size:.85rem;color:rgba(255,255,255,.4)">Basis: Claude Sonnet 4 via Anthropic API. System-Prompt bereits im Code hinterlegt. Deployment-Aufwand: ein API-Key, fünf Minuten.</p>
+      <p style="margin-top:8px;font-size:.85rem;color:rgba(255,255,255,.4)">Basis: Gemini-Flash-Preview 3 via API. System-Prompt bereits im Code hinterlegt. Deployment-Aufwand: ein API-Key, fünf Minuten.</p>
     </div>
     <div class="chat-mock">
       <div class="chat-mock-header">
@@ -433,7 +429,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
     </div>
     <div class="deploy-item">
       <div class="d-num">2</div>
-      <div class="d-label">Anthropic API-Key für den Chatbot hinterlegen</div>
+      <div class="d-label"> API-Key für den Chatbot hinterlegen</div>
     </div>
     <div class="deploy-item">
       <div class="d-num">3</div>
@@ -453,7 +449,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'IBM Plex Sans',san
   <p class="sub">Was wir heute von Ihnen brauchen, um morgen live zu gehen.</p>
   <div class="ask-items">
     <div class="ask-item"><div class="num">01</div><p>Freigabe zur Veröffentlichung der HTML-Datei auf trumpf.com oder einer Subdomain</p></div>
-    <div class="ask-item"><div class="num">02</div><p>Bereitstellung eines Anthropic API-Keys (oder Weiterleitung an ein Backend-Team für 30 Minuten Konfiguration)</p></div>
+    <div class="ask-item"><div class="num">02</div><p>Bereitstellung eines API-Keys (oder Weiterleitung an ein Backend-Team für 30 Minuten Konfiguration)</p></div>
     <div class="ask-item"><div class="num">03</div><p>Kontakt zum Produktmarketing-Team für Austausch der Bildplatzhalter durch echte TRUMPF-Fotografie</p></div>
   </div>
 </div>
